@@ -1,17 +1,17 @@
 import requests
 
 class EDSFetcher:
-    def __init__(self, endpoint: str, file_path: str) -> None:
+    def __init__(self, endpoint: str, file_path: str):
         self.endpoint = endpoint
         self.file_path = file_path
 
-    def fetch_data(self):
+    def fetch_data(self) -> None:
         try:
             response = requests.get(url=self.endpoint)
         except Exception as e:
             print("Error fetching data: ", e)
 
-        result = response.json()
+        result =  response.json()
         records = result.get('records', [])
         records = [record for record in records if record['PriceArea'] == 'DK1']
         records = [{k: v for k, v in record.items() if k in ['HourDK', 'SpotPriceDKK']} for record in records]
