@@ -5,7 +5,7 @@ class EDSFetcher:
         self.endpoint = endpoint
         self.file_path = file_path
 
-    def fetch(self):
+    def fetch_data(self):
         try:
             response = requests.get(url=self.endpoint)
         except Exception as e:
@@ -25,4 +25,4 @@ class EDSFetcher:
 if __name__ == "__main__":
     endpoint = 'https://api.energidataservice.dk/dataset/Elspotprices?limit=50'
     file_path = '/home/dremacs/github/backend/app/infrastructure/data/spot_prices.json'
-    EDSFetcher(endpoint, file_path).fetch()
+    EDSFetcher(endpoint, file_path).fetch_data()
