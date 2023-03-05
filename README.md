@@ -1,5 +1,19 @@
 # backend
 
+# Getting started
+To run the service you must first activate the environment with _conda_:
+````
+conda activate
+````
+Then you can run the main python application:
+````
+python ./app/
+````
+You can check that everything is running by opening your browser and vist: http://0.0.0.0:8000/api/v1/status.
+This page should display an healthy status of this service.
+
+# Anaconda
+
 To create an _actual_ conda environment:  
 ````
 conda create --prefix ./environment
