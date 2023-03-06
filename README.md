@@ -1,4 +1,5 @@
 # backend
+After activating _watssdown_ Conda environment run: ```make``` to download requirements, format, test, and run with docker-compose.
 
 # Getting started
 1. Create Conda environment:
