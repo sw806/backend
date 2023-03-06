@@ -1,12 +1,12 @@
-name: CI
-run-name: CI by ${{ github.actor }}
+name: Integration
+run-name: Integration by ${{ github.actor }}
 
 on:
   push:
   workflow_dispatch:
 
 jobs:
-  ci:
+  format and test:
     name: Miniconda ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
