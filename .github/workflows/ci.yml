@@ -17,7 +17,7 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: wattsdown
-          python-version: 3.10
+          python-version: "3.10"
           auto-activate-base: false
       - shell: bash -l {0}
         run: |
