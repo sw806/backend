@@ -65,5 +65,5 @@ docker-compose up
 This will build with the current directory of the compose file as its context.
 Alternatively you can use Make:
 ````
-make
+make dc
 ````

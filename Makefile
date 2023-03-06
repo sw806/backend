@@ -1,4 +1,6 @@
-docker:
+all: req fmt test dc
+
+dc:
 	docker-compose up
 
 req:
