@@ -1,5 +1,5 @@
-name: Integration
-run-name: Integration by ${{ github.actor }}
+name: Delivery
+run-name: Delivery by ${{ github.actor }}
 
 on:
   push:
