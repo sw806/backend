@@ -18,3 +18,18 @@ pip install -r requirements.txt
 python ./app/
 ````
 
+# Test
+To run all the tests:
+````
+pytest
+````
+
+# Docker
+To build the image:
+````
+docker build . --tag wattsdown:dev
+````
+To run the newly built image:
+````
+docker run --publish 8000:8000 wattsdown:dev
+````
