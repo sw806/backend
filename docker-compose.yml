@@ -1,0 +1,12 @@
+version: "3.8"
+
+networks:
+  network:
+
+services:
+  backend:
+    build: .
+    networks:
+      - network
+    ports:
+      - 8000:8000
