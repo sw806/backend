@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  integration:
+  format_and_test:
     name: Miniconda ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
