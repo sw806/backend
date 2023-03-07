@@ -14,7 +14,7 @@ class EDSFetcher(ElectricityPrices):
             print("Error fetching data: ", e)
 
         # We are only interested in the records that are in the DK1 price area
-        result =  response.json()
+        result = response.json()
         records = result.get('records', [])
         records = [record for record in records if record['PriceArea'] == 'DK1']
         records = [{k: v for k, v in record.items() if k in ['HourDK', 'SpotPriceDKK']} for record in records]
