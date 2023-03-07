@@ -19,7 +19,7 @@ class EdsUrlBuilder:
 
     @property
     def get_root(self) -> str:
-        return "https://api.energidataservice.dk"
+        return "https://api.energidataservice.dk/dataset"
 
     def set_limit(self, limit: int) -> EdsUrlBuilder:
         self.limit = limit
