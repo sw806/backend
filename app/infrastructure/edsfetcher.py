@@ -2,8 +2,8 @@ import requests
 from typing import Any, Dict, List
 from datetime import datetime
 from requests import Response
-from eletricity_prices import ElectricityPrices, PricePoint
-from eds_url_builder import EdsUrlBuilder
+from .eletricity_prices import ElectricityPrices, PricePoint
+from .eds_url_builder import EdsUrlBuilder
 
 class EDSFetcher(ElectricityPrices):
     def __init__(self):

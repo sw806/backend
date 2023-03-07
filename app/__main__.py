@@ -2,11 +2,11 @@ from fastapi import FastAPI
 import uvicorn
 
 from presentation import (
-    tasks_router, status_router
+    schedules_router, status_router
 )
 
 fastApi = FastAPI()
-fastApi.include_router(tasks_router)
+fastApi.include_router(schedules_router)
 fastApi.include_router(status_router)
 
 if __name__ == "__main__":
