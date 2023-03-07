@@ -1,7 +1,7 @@
 import requests
 from typing import List
+from eletricity_prices import ElectricityPrices, PricePoint
 
-from .eletricity_prices import ElectricityPrices, PricePoint
 
 class EDSFetcher(ElectricityPrices):
     def __init__(self, endpoint: str):
@@ -27,7 +27,9 @@ class EDSFetcher(ElectricityPrices):
             price_point.price = record['SpotPriceDKK']
             price_points.append(price_point)
 
-        return price_points
+        rev_price_points = price_points[::-1]
+        return rev_price_points
+
 
 if __name__ == "__main__":
     endpoint = 'https://api.energidataservice.dk/dataset/Elspotprices?limit=50'
