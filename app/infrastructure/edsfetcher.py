@@ -1,5 +1,5 @@
 import requests
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from requests import Response
 from .eletricity_prices import ElectricityPrices, PricePoint
@@ -9,14 +9,17 @@ class EDSFetcher(ElectricityPrices):
     def __init__(self):
         pass
 
-    def get_prices(self, start_time: datetime, end_time: datetime) -> List[PricePoint]:
+    def get_prices(self, start_time: datetime, end_time: Optional[datetime]) -> List[PricePoint]:
         # Builds URL for Eds "Elspotprices" dataset.
-        url = EdsUrlBuilder("Elspotprices") \
+        builder = EdsUrlBuilder("Elspotprices") \
             .set_start(start_time) \
-            .set_end(end_time) \
             .add_to_filter("PriceArea", "DK1") \
             .set_sort_on_key("HourDK", True) \
-            .build()
+
+        if not end_time is None:
+            builder.set_end(end_time)
+
+        url = builder.build()
 
         try:
             response: Response = requests.get(url)
