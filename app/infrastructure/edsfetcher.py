@@ -32,4 +32,3 @@ class EDSFetcher(ElectricityPrices):
 if __name__ == "__main__":
     endpoint = 'https://api.energidataservice.dk/dataset/Elspotprices?limit=50'
     price_points = EDSFetcher(endpoint).get_prices()
-    print(price_points)
