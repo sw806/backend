@@ -1,4 +1,3 @@
-import os.path
 from .edsfetcher import EDSFetcher
 import pytest
 

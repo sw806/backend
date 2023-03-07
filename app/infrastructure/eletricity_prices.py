@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from datetime import time
+from datetime import time, datetime
 from typing import List
 
 class PricePoint:
     def __init__(self) -> None:
-        self.time: time
+        self.time: datetime
         self.price: float
 
 class ElectricityPrices(ABC):
