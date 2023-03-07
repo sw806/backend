@@ -51,11 +51,15 @@ class EdsUrlBuilder:
         else: self.filter[key] = [value]
         return self
 
-    def _format_datetime(datetime: datetime) -> str:
-        iso = datetime.isoformat()
+    def _format_datetime(time: datetime) -> str:
         # isoformat includes seconds but EDS interprets it as an invalid format.
         # Eg. "2023-03-07T00:00:00" should be "2023-03-07T00:00"
-        return iso[:-3]
+        # For this reason we remove all unnecessary information by creating a new datetime.
+        corrected: datetime = datetime(
+            time.year, time.month, time.day,
+            time.hour, time.minute
+        )
+        return corrected.isoformat()[:-3]
 
     def _quote(list: List[Any], seperator: str, quote: str = '"') -> str:
         quoted: List[str] = [quote + str(elem) + quote for elem in list]
