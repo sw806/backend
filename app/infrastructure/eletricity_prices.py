@@ -9,5 +9,5 @@ class PricePoint:
 
 class ElectricityPrices(ABC):
     @abstractmethod
-    def get_prices(self, start_time: datetime , end_time: Optional[datetime]) -> List[PricePoint]:
+    def get_prices(self, start: Optional[datetime] = None , end: Optional[datetime] = None) -> List[PricePoint]:
         pass

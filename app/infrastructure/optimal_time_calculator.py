@@ -2,7 +2,7 @@ import math
 import datetime
 from typing import List, Optional
 from eletricity_prices import PricePoint
-from edsfetcher import EDSFetcher
+from app.infrastructure.eds_requests import EdsRequests
 
 class OptimalTimeCalculator:
     def __init__(self):
@@ -32,7 +32,7 @@ class OptimalTimeCalculator:
         return optimal_start_time
 
 if __name__ == "__main__":
-    price_points = EDSFetcher('https://api.energidataservice.dk/dataset/Elspotprices?limit=50').get_prices()
+    price_points = EdsRequests('https://api.energidataservice.dk/dataset/Elspotprices?limit=50').get_prices()
     optimal_time_calculator = OptimalTimeCalculator()
     optimal_time = optimal_time_calculator.calculate_optimal_time(price_points, 3, 1, None)
     print("Optimal start time: ", optimal_time)
