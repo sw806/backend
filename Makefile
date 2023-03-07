@@ -4,14 +4,14 @@ dc:
 	docker-compose up
 
 req:
-	python -m pip install -r requirements.txt
+	pip install -r requirements.txt
 
 run:
-	python ./app/
+	python3 ./app/
 
 fmt:
-	python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-	python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+	python3 -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+	python3 -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 test:
 	pytest
