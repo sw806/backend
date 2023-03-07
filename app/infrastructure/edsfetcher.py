@@ -1,36 +1,43 @@
 import requests
-from typing import List
-from .eletricity_prices import ElectricityPrices, PricePoint
-
+from typing import Any, Dict, List
+from datetime import datetime
+from requests import Response
+from eletricity_prices import ElectricityPrices, PricePoint
+from eds_url_builder import EdsUrlBuilder
 
 class EDSFetcher(ElectricityPrices):
-    def __init__(self, endpoint: str):
-        self.endpoint = endpoint
+    def __init__(self):
+        pass
 
-    def get_prices(self, start_time=None, end_time=None) -> List[PricePoint]: # start_time and end_time not used in MVP
+    def get_prices(self, start_time: datetime, end_time: datetime) -> List[PricePoint]:
+        # Builds URL for Eds "Elspotprices" dataset.
+        url = EdsUrlBuilder("Elspotprices") \
+            .set_start(start_time) \
+            .set_end(end_time) \
+            .add_to_filter("PriceArea", "DK1") \
+            .set_sort_on_key("HourDK", True) \
+            .build()
+
         try:
-            response = requests.get(url=self.endpoint)
+            response: Response = requests.get(url)
         except Exception as e:
             print("Error fetching data: ", e)
+            raise e
 
-        # We are only interested in the records that are in the DK1 price area
+        # Get all records (PricePoints) from the request
         result =  response.json()
-        records = result.get('records', [])
-        records = [record for record in records if record['PriceArea'] == 'DK1']
-        records = [{k: v for k, v in record.items() if k in ['HourDK', 'SpotPriceDKK']} for record in records]
+        records: List[Dict[str, Any]] = result.get('records', [])
 
+        return self.create_price_points_from_json(records)
+
+    def create_price_points_from_json(self, json: List[Dict[str, Any]]) -> List[PricePoint]:
         # For each record in records, create a PricePoint object and add it to the list
-        price_points = []
-        for record in records:
-            price_point = PricePoint()
-            price_point.time = record['HourDK']
-            price_point.price = record['SpotPriceDKK']
+        price_points: List[PricePoint] = []
+        for record in json:
+            price_point = PricePoint(
+                datetime.fromisoformat(record['HourDK']),
+                float(record['SpotPriceDKK'])
+            )
             price_points.append(price_point)
 
-        rev_price_points = price_points[::-1]
-        return rev_price_points
-
-
-if __name__ == "__main__":
-    endpoint = 'https://api.energidataservice.dk/dataset/Elspotprices?limit=50'
-    price_points = EDSFetcher(endpoint).get_prices()
+        return price_points
