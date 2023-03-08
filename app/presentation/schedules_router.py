@@ -1,14 +1,12 @@
 from fastapi import APIRouter
-
-from application import User, ScheduleTaskRequest
+from app.application import User, ScheduleTaskRequest
 
 schedules_router = APIRouter(prefix="/api/v1")
 
-@schedules_router.get("/tasks/{task_id}")
-async def root(task_id):
+
+@schedules_router.post("/schedules")
+async def schedule(request: ScheduleTaskRequest):
     try:
-        user = User()
-        request = ScheduleTaskRequest(task_id)
-        return user.schedule_task(request)
+        return User().schedule_task(request)
     except:
         return "Something went wrong!"

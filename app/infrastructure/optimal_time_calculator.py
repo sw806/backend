@@ -1,8 +1,8 @@
 import math
 import datetime
 from typing import List, Optional
-from eletricity_prices import PricePoint
-from edsfetcher import EDSFetcher
+from .eletricity_prices import PricePoint
+from .edsfetcher import EDSFetcher
 
 class OptimalTimeCalculator:
     def __init__(self):
@@ -17,7 +17,7 @@ class OptimalTimeCalculator:
             duration_hours = energy / power
             duration = datetime.timedelta(hours=duration_hours)
 
-        no_of_intervals = math.ceil(duration.total_seconds() / 3600)
+        no_of_intervals = math.ceil(duration / 3600)
         lowestSum = float('inf')
         optimal_start_time = None
         for i in range(len(price_points) - (no_of_intervals - 1)):
