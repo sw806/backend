@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
-from app.infrastructure import EDSFetcher
-from app.infrastructure.optimal_time_calculator import OptimalTimeCalculator
+from infrastructure import EdsRequests
+from infrastructure import OptimalTimeCalculator
 from pydantic import BaseModel
 
 class ScheduleTaskRequest(BaseModel):
@@ -22,7 +22,7 @@ class ScheduleTaskUseCase:
         pass
 
     def do(self, request: ScheduleTaskRequest) -> ScheduleTaskResponse:
-        price_points = EDSFetcher().get_prices(datetime.now(), None)
+        price_points = EdsRequests().get_prices(datetime.now(), None)
         optimal_time = OptimalTimeCalculator()\
             .calculate_optimal_time(price_points, request.energy, request.power, request.duration)
         print("Optimal start time: ", optimal_time)

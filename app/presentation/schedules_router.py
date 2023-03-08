@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.application import User, ScheduleTaskRequest
+from application import User, ScheduleTaskRequest
 
 schedules_router = APIRouter(prefix="/api/v1")
 
