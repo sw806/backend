@@ -1,7 +1,7 @@
 all: req fmt test dc
 
 dc:
-	docker compose up
+	docker compose up --build
 
 req:
 	pip install -r requirements.txt
