@@ -5,19 +5,21 @@ from requests import Response
 from .eletricity_prices import ElectricityPrices, PricePoint
 from .eds_url_builder import EdsUrlBuilder
 
-class EDSFetcher(ElectricityPrices):
+class EdsRequests(ElectricityPrices):
     def __init__(self):
         pass
 
-    def get_prices(self, start_time: datetime, end_time: Optional[datetime]) -> List[PricePoint]:
+    def get_prices(self, start: Optional[datetime], end: Optional[datetime] = None) -> List[PricePoint]:
         # Builds URL for Eds "Elspotprices" dataset.
         builder = EdsUrlBuilder("Elspotprices") \
-            .set_start(start_time) \
             .add_to_filter("PriceArea", "DK1") \
             .set_sort_on_key("HourDK", True) \
 
-        if not end_time is None:
-            builder.set_end(end_time)
+        if not start is None:
+            builder.set_start(start)
+
+        if not end is None:
+            builder.set_end(end)
 
         url = builder.build()
 
@@ -37,10 +39,21 @@ class EDSFetcher(ElectricityPrices):
         # For each record in records, create a PricePoint object and add it to the list
         price_points: List[PricePoint] = []
         for record in json:
-            price_point = PricePoint(
-                datetime.fromisoformat(record['HourDK']),
-                float(record['SpotPriceDKK'])
-            )
+            try:
+                time: datetime = datetime.fromisoformat(record['HourDK'])
+            except KeyError as exc:
+                raise KeyError("Missing 'HourDK' in price point record", record) from exc
+            except ValueError as exc:
+                raise ValueError("'HourDK' is not iso format", record) from exc
+
+            try:
+                price: float = float(record['SpotPriceDKK'])
+            except KeyError as exc:
+                raise KeyError("Missing 'SpotPriceDKK' in price point record", record) from exc
+            except ValueError as exc:
+                raise ValueError("'SpotPriceDKK' is not a floating point number", record) from exc
+
+            price_point = PricePoint(time, price)
             price_points.append(price_point)
 
         return price_points
