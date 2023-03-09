@@ -8,14 +8,8 @@ class OptimalTimeCalculator:
     def __init__(self):
         pass
 
-    def calculate_optimal_time(self, price_points: List[PricePoint], energy: Optional[int], power: Optional[int],
+    def calculate_optimal_time(self, price_points: List[PricePoint], power: Optional[int],
                                duration: Optional[datetime.time]) -> datetime:
-        # Har lige et par ting vi kan tale om ang. energy, power og duration
-        if duration is None:
-            if energy is None or power is None:
-                raise ValueError("Both energy and power must be provided if duration is not specified")
-            duration_hours = energy / power
-            duration = datetime.timedelta(hours=duration_hours)
 
         no_of_intervals = math.ceil(duration / 3600)
         lowestSum = float('inf')
