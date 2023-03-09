@@ -6,7 +6,7 @@ from app.infrastructure.optimal_time_calculator import OptimalTimeCalculator
 
 
 class TestEdsEndpointBuilder:
-    def test_with_just_dataset(self):
+    def test_one_hour_span(self):
         # Arrange
         price_points: List[Dict[datetime, float]] = [
             {datetime(2021, 1, 1, 23): 10.0},
