@@ -20,4 +20,4 @@ jobs:
           host: 130.225.39.82
           username: ubuntu
           key: ${{ secrets.STRATO_PEM }}
-          script: whoami
+          script: make update
