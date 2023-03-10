@@ -3,7 +3,7 @@ ci: req fmt test db
 all: req fmt test dc
 
 db:
-	docker compose build --build-arg COMMIT_HASH=$(shell git rev-parse --short HEAD)
+	docker compose build --build-arg COMMIT_HASH=$(shell git rev-parse HEAD)
 
 dc: db
 	docker compose up
