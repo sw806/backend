@@ -1,0 +1,19 @@
+name: Deployment
+run-name: Deployment by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Delivery]
+    types: [completed]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ http://10.92.0.41 }}
+        fingerprint: ${{ secrets.STRATO_PEM }}
+        script: whoami
