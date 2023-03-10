@@ -2,17 +2,19 @@ from datetime import datetime
 from typing import Optional
 from infrastructure import EdsRequests
 from infrastructure import OptimalTimeCalculator
-from pydantic import BaseModel
+from pydantic.dataclasses import dataclass
 
-class ScheduleTaskRequest(BaseModel):
-    def __init__(self, duration: Optional[int], energy: Optional[float],
-                 power: Optional[float]):
+@dataclass
+class ScheduleTaskRequest:
+    duration: int
+    power: float
+
+    def __init__(self, duration: Optional[int], power: Optional[float]):
         self.duration = duration
-        self.energy = energy
         self.power = power
 
 
-class ScheduleTaskResponse(BaseModel):
+class ScheduleTaskResponse:
     def __init__(self, start_date: int):
         self.start_date = start_date
 
@@ -24,9 +26,10 @@ class ScheduleTaskUseCase:
     def do(self, request: ScheduleTaskRequest) -> ScheduleTaskResponse:
         price_points = EdsRequests().get_prices(datetime.now(), None)
         optimal_time = OptimalTimeCalculator()\
-            .calculate_optimal_time(price_points, request.energy, request.power, request.duration)
+            .calculate_optimal_time(price_points, request.power, request.duration)
         print("Optimal start time: ", optimal_time)
-        return ScheduleTaskResponse(optimal_time)
+        optimal_time_unix = int(optimal_time.timestamp())
+        return ScheduleTaskResponse(optimal_time_unix)
 
 
 if __name__ == "__main__":
