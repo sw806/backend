@@ -8,16 +8,18 @@ on:
     types: [completed]
 
 jobs:
-  format_and_test:
+  deploy via ssh:
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
             os: ["ubuntu-latest"]
     steps:
-      - name: executing remote ssh commands using password
+      - name: SSH and update
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: 130.225.39.82
           username: ubuntu
           key: ${{ secrets.STRATO_PEM }}
-          script: make update
+          script: |
+            cd /srv/wattsdown/deployment \
+            make update
