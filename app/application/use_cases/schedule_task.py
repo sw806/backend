@@ -27,5 +27,4 @@ class ScheduleTaskUseCase:
         price_points = EdsRequests().get_prices(datetime.now(), None)
         optimal_time = OptimalTimeCalculator()\
             .calculate_optimal_time(price_points, request.power, request.duration)
-        print("Optimal start time: ", optimal_time)
         return ScheduleTaskResponse(optimal_time)
