@@ -8,7 +8,7 @@ on:
     types: [completed]
 
 jobs:
-  deploy via ssh:
+  deploy_via_ssh:
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
