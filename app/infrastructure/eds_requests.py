@@ -33,7 +33,7 @@ class EdsRequests(ElectricityPrices):
         result =  response.json()
         records: List[Dict[str, Any]] = result.get('records', [])
 
-        return self.create_price_points_from_json(records)
+        return self.create_price_points_from_json(records)[::-1]
 
     def create_price_points_from_json(self, json: List[Dict[str, Any]]) -> List[PricePoint]:
         # For each record in records, create a PricePoint object and add it to the list
