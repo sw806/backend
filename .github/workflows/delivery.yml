@@ -5,8 +5,10 @@ env:
   REGISTRY: ghcr.io
 
 on:
-  push:
   workflow_dispatch:
+  workflow_run:
+    workflows: [Integration]
+    types: [completed]
 
 jobs:
   push_to_registry:
