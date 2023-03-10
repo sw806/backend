@@ -5,7 +5,10 @@ networks:
 
 services:
   backend:
-    build: .
+    build:
+      context: .
+      args:
+        - COMMIT_HASH
     networks:
       - network
     ports:

@@ -7,7 +7,6 @@
 ./.dockerignore
 ./.editorconfig
 ./.gitignore
-./Makefile
 ./README
 
 # Project specific

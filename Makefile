@@ -3,10 +3,10 @@ ci: req fmt test db
 all: req fmt test dc
 
 db:
-	docker compose build
+	docker compose build --build-arg COMMIT_HASH=$(shell git rev-parse --short HEAD)
 
-dc:
-	docker compose up --build
+dc: db
+	docker compose up
 
 req:
 	pip install -r requirements.txt
