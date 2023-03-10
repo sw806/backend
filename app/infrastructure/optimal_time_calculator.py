@@ -9,7 +9,7 @@ class OptimalTimeCalculator:
         pass
 
     def calculate_optimal_time(self, price_points: List[PricePoint], power: Optional[int],
-                               duration: Optional[datetime.time]) -> datetime:
+                               duration: Optional[datetime.time]) -> int:
 
         no_of_intervals = math.ceil(duration / 3600)
         lowestSum = float('inf')
@@ -23,4 +23,4 @@ class OptimalTimeCalculator:
                 lowestSum = averageSum
                 optimal_start_time = price_points[i].time
 
-        return optimal_start_time
+        return int(optimal_start_time.timestamp())
