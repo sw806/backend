@@ -28,7 +28,8 @@ class ScheduleTaskUseCase:
         optimal_time = OptimalTimeCalculator()\
             .calculate_optimal_time(price_points, request.power, request.duration)
         print("Optimal start time: ", optimal_time)
-        return ScheduleTaskResponse(optimal_time)
+        optimal_time_unix = int(optimal_time.timestamp())
+        return ScheduleTaskResponse(optimal_time_unix)
 
 
 if __name__ == "__main__":

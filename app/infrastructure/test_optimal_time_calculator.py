@@ -1,6 +1,5 @@
 from datetime import datetime
-from typing import List, Dict
-
+from typing import List
 from app.infrastructure.eletricity_prices import PricePoint
 from app.infrastructure.optimal_time_calculator import OptimalTimeCalculator
 
