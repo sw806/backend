@@ -18,5 +18,5 @@ jobs:
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: 10.92.0.41
-          fingerprint: ${{ secrets.STRATO_PEM }}
+          key: ${{ secrets.STRATO_PEM }}
           script: whoami
