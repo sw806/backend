@@ -8,12 +8,15 @@ on:
     types: [completed]
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  format_and_test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: ["ubuntu-latest"]
     steps:
-    - name: executing remote ssh commands using password
-      uses: appleboy/ssh-action@v0.1.8
-      with:
-        host: ${{ http://10.92.0.41 }}
-        fingerprint: ${{ secrets.STRATO_PEM }}
-        script: whoami
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ http://10.92.0.41 }}
+          fingerprint: ${{ secrets.STRATO_PEM }}
+          script: whoami
