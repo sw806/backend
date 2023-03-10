@@ -1,4 +1,9 @@
+ci: req fmt test db
+
 all: req fmt test dc
+
+db:
+	docker compose build
 
 dc:
 	docker compose up --build
