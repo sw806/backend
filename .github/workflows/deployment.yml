@@ -18,5 +18,6 @@ jobs:
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: 10.92.0.41
+          username: ubuntu
           key: ${{ secrets.STRATO_PEM }}
           script: whoami
