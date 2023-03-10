@@ -19,5 +19,5 @@ jobs:
         with:
           host: 10.92.0.41
           username: ubuntu
-          key: ${{ secrets.STRATO_PEM }}
+          passphrase: ${{ secrets.STRATO_PEM }}
           script: whoami
