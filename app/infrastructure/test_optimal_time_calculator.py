@@ -108,3 +108,43 @@ class TestOptimalTimeCalculator:
 
         # Assert
         assert optimal_time == int(expected.timestamp())
+
+    def test_one_and_a_quarter_hour_span(self):
+        # Arrange
+        expected: datetime = datetime(2021, 1, 1, 18, 45)
+        price_points: List[PricePoint] = [
+            PricePoint(datetime(2021, 1, 1, 15), 10.0),
+            PricePoint(datetime(2021, 1, 1, 16), 10.0),
+            PricePoint(datetime(2021, 1, 1, 17), 5.0),
+            PricePoint(datetime(2021, 1, 1, 18), 6.0),
+            PricePoint(datetime(2021, 1, 1, 19), 4.0),
+            PricePoint(datetime(2021, 1, 1, 20), 10.0),
+            PricePoint(datetime(2021, 1, 1, 21), 10.0),
+            PricePoint(datetime(2021, 1, 1, 22), 10.0)
+        ]
+
+        # Act
+        optimal_time = OptimalTimeCalculator2.calculate_optimal_time(self, price_points, 1, 4500)
+
+        # Assert
+        assert optimal_time == int(expected.timestamp())
+
+    def test_one_and_three_quarters_hour_span(self):
+        # Arrange
+        expected: datetime = datetime(2021, 1, 1, 18, 15)
+        price_points: List[PricePoint] = [
+            PricePoint(datetime(2021, 1, 1, 15), 10.0),
+            PricePoint(datetime(2021, 1, 1, 16), 10.0),
+            PricePoint(datetime(2021, 1, 1, 17), 5.0),
+            PricePoint(datetime(2021, 1, 1, 18), 6.0),
+            PricePoint(datetime(2021, 1, 1, 19), 4.0),
+            PricePoint(datetime(2021, 1, 1, 20), 10.0),
+            PricePoint(datetime(2021, 1, 1, 21), 10.0),
+            PricePoint(datetime(2021, 1, 1, 22), 10.0)
+        ]
+
+        # Act
+        optimal_time = OptimalTimeCalculator2.calculate_optimal_time(self, price_points, 1, 6300)
+
+        # Assert
+        assert optimal_time == int(expected.timestamp())
