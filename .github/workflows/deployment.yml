@@ -9,6 +9,7 @@ on:
 
 jobs:
   deploy_via_ssh:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
