@@ -1,4 +1,4 @@
-ci: req fmt test db
+ci: req fmt db test
 
 all: req fmt test dc
 
@@ -20,3 +20,4 @@ fmt:
 
 test:
 	pytest
+	./scripts/dc-sanity-check.sh

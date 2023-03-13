@@ -34,3 +34,5 @@ jobs:
         shell: bash -l {0}
         run: |
             pytest
+      - name: Run sanity check
+        run: ./scripts/dc-sanity-check.sh
