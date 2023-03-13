@@ -7,9 +7,13 @@ EXIT=0
 
 docker compose up -d
 sleep 1s
-curl --fail --retry 10 http://0.0.0.0:8010/api/v1/status \
-    && (echo "" && echo "${GREEN}==============================Sanity check PASSED!==============================${NC}" && EXIT=0) \
-    || (echo "${RED}==============================Sanity check FAILED!==============================${NC}" && EXIT=1)
-echo ""
+if curl --fail --retry 10 http://0.0.0.0:8000/api/v1/status; then
+    echo ""
+    echo "${GREEN}==============================Sanity check PASSED!==============================${NC}"
+else
+    echo ""
+    echo "${RED}==============================Sanity check FAILED!==============================${NC}"
+    EXIT=1
+fi;
 docker compose down
 exit ${EXIT}
