@@ -6,13 +6,15 @@ from pydantic.dataclasses import dataclass
 
 @dataclass
 class ScheduleTaskRequest:
-    duration: datetime.timedelta
+    duration: int
     power: float
 
     def __init__(self, duration: Optional[int], power: Optional[float]):
-        self.duration = datetime.timedelta(seconds=duration)
+        self.duration = duration
         self.power = power
 
+    def get_duration(self) -> datetime.timedelta:
+        return datetime.timedelta(seconds=self.duration)
 
 class ScheduleTaskResponse:
     def __init__(self, start_date: int):
@@ -26,5 +28,5 @@ class ScheduleTaskUseCase:
     def do(self, request: ScheduleTaskRequest) -> ScheduleTaskResponse:
         price_points = EdsRequests().get_prices(datetime.now(), None)
         optimal_time = OptimalTimeCalculator()\
-            .calculate_optimal_time(price_points, request.power, request.duration)
+            .calculate_optimal_time(price_points, request.power, request.get_duration())
         return ScheduleTaskResponse(optimal_time)
