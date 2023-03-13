@@ -4,7 +4,7 @@ from typing import List, Optional
 from .eletricity_prices import PricePoint
 
 
-class OptimalTimeCalculator2:
+class OptimalTimeCalculator:
     def __init__(self):
         pass
 
@@ -12,8 +12,8 @@ class OptimalTimeCalculator2:
                                duration: Optional[datetime.timedelta]) -> int:
 
         has_incomplete_interval = False
-        no_of_complete_intervals = int(duration / 3600)
-        size_of_incomplete_intervals = duration % 3600
+        no_of_complete_intervals = int(duration.seconds / 3600)
+        size_of_incomplete_intervals = duration.seconds % 3600
         if size_of_incomplete_intervals != 0:
             no_of_intervals = no_of_complete_intervals + 1
             has_incomplete_interval = True

@@ -13,9 +13,6 @@ class ScheduleTaskRequest:
         self.duration = duration
         self.power = power
 
-    def get_duration(self) -> datetime.timedelta:
-        return datetime.timedelta(seconds=self.duration)
-
 class ScheduleTaskResponse:
     def __init__(self, start_date: int):
         self.start_date = start_date
@@ -26,7 +23,7 @@ class ScheduleTaskUseCase:
         pass
 
     def do(self, request: ScheduleTaskRequest) -> ScheduleTaskResponse:
-        price_points = EdsRequests().get_prices(datetime.now(), None)
+        price_points = EdsRequests().get_prices(datetime.datetime.now(), None)
         optimal_time = OptimalTimeCalculator()\
-            .calculate_optimal_time(price_points, request.power, request.get_duration())
+            .calculate_optimal_time(price_points, request.power, datetime.timedelta(seconds=request.duration))
         return ScheduleTaskResponse(optimal_time)

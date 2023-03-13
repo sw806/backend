@@ -8,5 +8,6 @@ schedules_router = APIRouter(prefix="/api/v1")
 async def schedule(request: ScheduleTaskRequest):
     try:
         return User().schedule_task(request)
-    except:
+    except Exception as e:
+        return "Error: " + str(e)
         return "Something went wrong!"

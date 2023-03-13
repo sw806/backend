@@ -1,8 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 from app.infrastructure.eletricity_prices import PricePoint
-from app.infrastructure.optimal_time_calculator_deprec import OptimalTimeCalculator
-from app.infrastructure.optimal_time_calculator import OptimalTimeCalculator2
+from app.infrastructure import OptimalTimeCalculator
 
 
 class TestOptimalTimeCalculator:
@@ -21,7 +20,7 @@ class TestOptimalTimeCalculator:
         ]
 
         # Act
-        optimal_time = OptimalTimeCalculator2().calculate_optimal_time(price_points, 1, 3600)
+        optimal_time = OptimalTimeCalculator().calculate_optimal_time(price_points, 1, timedelta(seconds=3600))
 
         # Assert
         assert optimal_time == int(expected.timestamp())
@@ -42,7 +41,7 @@ class TestOptimalTimeCalculator:
         ]
 
         # Act
-        optimal_time = OptimalTimeCalculator2().calculate_optimal_time(price_points, 1, 7200)
+        optimal_time = OptimalTimeCalculator().calculate_optimal_time(price_points, 1, timedelta(seconds=7200))
 
         # Assert
         assert optimal_time == int(expected.timestamp())
@@ -63,7 +62,7 @@ class TestOptimalTimeCalculator:
         ]
 
         # Act
-        optimal_time = OptimalTimeCalculator2().calculate_optimal_time(price_points, 1, 7200)
+        optimal_time = OptimalTimeCalculator().calculate_optimal_time(price_points, 1, timedelta(seconds=7200))
 
         # Assert
         assert optimal_time == int(expected.timestamp())
@@ -84,7 +83,7 @@ class TestOptimalTimeCalculator:
         ]
 
         # Act
-        optimal_time = OptimalTimeCalculator2().calculate_optimal_time(price_points, 1, 3600)
+        optimal_time = OptimalTimeCalculator().calculate_optimal_time(price_points, 1, timedelta(seconds=3600))
 
         # Assert
         assert optimal_time == int(expected.timestamp())
@@ -104,7 +103,7 @@ class TestOptimalTimeCalculator:
         ]
 
         # Act
-        optimal_time = OptimalTimeCalculator2.calculate_optimal_time(self, price_points, 1, 5400)
+        optimal_time = OptimalTimeCalculator.calculate_optimal_time(self, price_points, 1, timedelta(seconds=5400))
 
         # Assert
         assert optimal_time == int(expected.timestamp())
@@ -124,7 +123,7 @@ class TestOptimalTimeCalculator:
         ]
 
         # Act
-        optimal_time = OptimalTimeCalculator2.calculate_optimal_time(self, price_points, 1, 4500)
+        optimal_time = OptimalTimeCalculator.calculate_optimal_time(self, price_points, 1, timedelta(seconds=4500))
 
         # Assert
         assert optimal_time == int(expected.timestamp())
@@ -144,7 +143,7 @@ class TestOptimalTimeCalculator:
         ]
 
         # Act
-        optimal_time = OptimalTimeCalculator2.calculate_optimal_time(self, price_points, 1, 6300)
+        optimal_time = OptimalTimeCalculator.calculate_optimal_time(self, price_points, 1, timedelta(seconds=6300))
 
         # Assert
         assert optimal_time == int(expected.timestamp())
@@ -164,7 +163,7 @@ class TestOptimalTimeCalculator:
         ]
 
         # Act
-        optimal_time = OptimalTimeCalculator2.calculate_optimal_time(self, price_points, 1, 0)
+        optimal_time = OptimalTimeCalculator.calculate_optimal_time(self, price_points, 1, timedelta(seconds=0))
 
         # Assert
         assert optimal_time == int(expected.timestamp())
@@ -184,7 +183,7 @@ class TestOptimalTimeCalculator:
         ]
 
         # Act
-        optimal_time = OptimalTimeCalculator2.calculate_optimal_time(self, price_points, 1, 30)
+        optimal_time = OptimalTimeCalculator.calculate_optimal_time(self, price_points, 1, timedelta(seconds=30))
 
         # Assert
         assert optimal_time == int(expected.timestamp())
@@ -204,7 +203,7 @@ class TestOptimalTimeCalculator:
         ]
 
         # Act
-        optimal_time = OptimalTimeCalculator2.calculate_optimal_time(self, price_points, 1, 3030)
+        optimal_time = OptimalTimeCalculator.calculate_optimal_time(self, price_points, 1, timedelta(seconds=3030))
 
         # Assert
         assert optimal_time == int(expected.timestamp())
