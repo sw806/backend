@@ -148,3 +148,23 @@ class TestOptimalTimeCalculator:
 
         # Assert
         assert optimal_time == int(expected.timestamp())
+
+    def test_span_is_zero(self):
+        # Arrange
+        expected: datetime = datetime(2021, 1, 1, 15)
+        price_points: List[PricePoint] = [
+            PricePoint(expected, 10.0),
+            PricePoint(datetime(2021, 1, 1, 16), 10.0),
+            PricePoint(datetime(2021, 1, 1, 17), 5.0),
+            PricePoint(datetime(2021, 1, 1, 18), 10.0),
+            PricePoint(datetime(2021, 1, 1, 19), 10.0),
+            PricePoint(datetime(2021, 1, 1, 20), 10.0),
+            PricePoint(datetime(2021, 1, 1, 21), 10.0),
+            PricePoint(datetime(2021, 1, 1, 22), 10.0)
+        ]
+
+        # Act
+        optimal_time = OptimalTimeCalculator2.calculate_optimal_time(self, price_points, 1, 0)
+
+        # Assert
+        assert optimal_time == int(expected.timestamp())

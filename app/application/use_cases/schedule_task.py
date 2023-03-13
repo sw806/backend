@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from typing import Optional
 from infrastructure import EdsRequests
 from infrastructure import OptimalTimeCalculator
@@ -6,11 +6,11 @@ from pydantic.dataclasses import dataclass
 
 @dataclass
 class ScheduleTaskRequest:
-    duration: int
+    duration: datetime.timedelta
     power: float
 
     def __init__(self, duration: Optional[int], power: Optional[float]):
-        self.duration = duration
+        self.duration = datetime.timedelta(seconds=duration)
         self.power = power
 
 

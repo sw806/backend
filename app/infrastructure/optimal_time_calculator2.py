@@ -9,7 +9,7 @@ class OptimalTimeCalculator2:
         pass
 
     def calculate_optimal_time(self, price_points: List[PricePoint], power: Optional[int],
-                               duration: Optional[datetime.time]) -> int:
+                               duration: Optional[datetime.timedelta]) -> int:
 
         has_incomplete_interval = False
         no_of_complete_intervals = int(duration / 3600)
