@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
 from random import random
-from typing import List
-
-from click import Tuple
+from typing import List, Tuple
 
 from infrastructure.eletricity_prices import PricePoint
 from infrastructure.spot_price_function import SpotPriceFunction
@@ -172,9 +170,13 @@ class TestPowerPriceFunction:
         initial_start = (datetime(2021, 1, 1, 15), timedelta(minutes=0))
         initial_end = (datetime(2021, 1, 1, 18), timedelta(hours=3))
         next_1 = power_price_function.next_discrete_point_from(initial_start, initial_start, initial_end)
+        if next_1 is None: assert False
         next_2 = power_price_function.next_discrete_point_from(initial_start, next_1, initial_end)
+        if next_2 is None: assert False
         next_3 = power_price_function.next_discrete_point_from(initial_start, next_2, initial_end)
+        if next_3 is None: assert False
         next_4 = power_price_function.next_discrete_point_from(initial_start, next_3, initial_end)
+        if next_4 is None: assert False
         (next_1_time, next_1_delta) = next_1
         (next_2_time, next_2_delta) = next_2
         (next_3_time, next_3_delta) = next_3
@@ -211,10 +213,15 @@ class TestPowerPriceFunction:
         initial_start = (datetime(2021, 1, 1, 15), timedelta(minutes=0))
         initial_end = (datetime(2021, 1, 1, 18), timedelta(hours=4))
         next_1 = power_price_function.next_discrete_point_from(initial_start, initial_start, initial_end)
+        if next_1 is None: assert False
         next_2 = power_price_function.next_discrete_point_from(initial_start, next_1, initial_end)
+        if next_2 is None: assert False
         next_3 = power_price_function.next_discrete_point_from(initial_start, next_2, initial_end)
+        if next_3 is None: assert False
         next_4 = power_price_function.next_discrete_point_from(initial_start, next_3, initial_end)
+        if next_4 is None: assert False
         next_5 = power_price_function.next_discrete_point_from(initial_start, next_4, initial_end)
+        if next_5 is None: assert False
         (next_1_time, next_1_delta) = next_1
         (next_2_time, next_2_delta) = next_2
         (next_3_time, next_3_delta) = next_3
@@ -379,27 +386,35 @@ class TestPowerPriceFunction:
         next_1 = power_price_function.next_discrete_point_from(
             initial_start, initial_start, initial_end
         )
+        if next_1 is None: assert False
         next_2 = power_price_function.next_discrete_point_from(
             initial_start, next_1, initial_end
         )
+        if next_2 is None: assert False
         next_3 = power_price_function.next_discrete_point_from(
             initial_start, next_2, initial_end
         )
+        if next_3 is None: assert False
         next_4 = power_price_function.next_discrete_point_from(
             initial_start, next_3, initial_end
         )
+        if next_4 is None: assert False
         next_5 = power_price_function.next_discrete_point_from(
             initial_start, next_4, initial_end
         )
+        if next_5 is None: assert False
         next_6 = power_price_function.next_discrete_point_from(
             initial_start, next_5, initial_end
         )
+        if next_6 is None: assert False
         next_7 = power_price_function.next_discrete_point_from(
             initial_start, next_6, initial_end
         )
+        if next_7 is None: assert False
         next_8 = power_price_function.next_discrete_point_from(
             initial_start, next_7, initial_end
         )
+        if next_8 is None: assert False
 
         # Assert
         assert next_1 == (datetime(2021, 1, 1, 16), timedelta(hours=1))

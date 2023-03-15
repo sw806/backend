@@ -16,7 +16,7 @@ run:
 
 # TODO: Add stricts
 lint:
-	cd ./app/; mypy . --disallow-subclassing-any --disallow-untyped-calls --disallow-incomplete-defs
+	cd ./app/; mypy . --disallow-subclassing-any --disallow-untyped-calls --disallow-incomplete-defs --check-untyped-defs
 
 fmt:
 	python3 -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
