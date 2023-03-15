@@ -11,7 +11,7 @@ on:
     types: [completed]
 
 jobs:
-  push_to_registry:
+  continous_delivery:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:

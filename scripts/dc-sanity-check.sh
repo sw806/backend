@@ -5,7 +5,7 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 EXIT=0
 
-docker compose up -d
+docker compose up --silent --detach
 sleep 1s
 if curl --fail --retry 10 http://0.0.0.0:8000/api/v1/status; then
     echo ""
