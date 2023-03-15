@@ -16,13 +16,13 @@ class ScheduleTaskResponse:
     def __init__(self, start_date: int):
         self.start_date = start_date
 
-
 class ScheduleTaskUseCase:
     def __init__(self) -> None:
         pass
 
     def do(self, request: ScheduleTaskRequest) -> ScheduleTaskResponse:
-        price_points = EdsRequests().get_prices(datetime.now())
-        optimal_time = OptimalTimeCalculator()\
-            .calculate_optimal_time(price_points, timedelta(seconds=request.duration))
+        eds_requests = EdsRequests()
+        price_points = eds_requests.get_prices(datetime.now())
+        optimal_time_calculator = OptimalTimeCalculator()
+        optimal_time = optimal_time_calculator.calculate_optimal_time(price_points, timedelta(seconds=request.duration))
         return ScheduleTaskResponse(optimal_time)

@@ -1,4 +1,4 @@
-ci: req fmt lint db test
+ci: req fmt lint test db
 
 all: req fmt test dc
 
@@ -16,7 +16,7 @@ run:
 
 # TODO: Add stricts
 lint:
-	cd ./app/; mypy .
+	cd ./app/; mypy . --disallow-subclassing-any --disallow-untyped-calls
 
 fmt:
 	python3 -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics

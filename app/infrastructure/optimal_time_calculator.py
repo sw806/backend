@@ -5,7 +5,7 @@ from .eletricity_prices import PricePoint
 
 
 class OptimalTimeCalculator:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     def calculate_optimal_time(self, price_points: List[PricePoint], duration: timedelta) -> int:

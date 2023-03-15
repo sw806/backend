@@ -6,7 +6,7 @@ from .eletricity_prices import ElectricityPrices, PricePoint
 from .eds_url_builder import EdsUrlBuilder
 
 class EdsRequests(ElectricityPrices):
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     def get_prices(self, start: Optional[datetime] = None, end: Optional[datetime] = None) -> List[PricePoint]:
