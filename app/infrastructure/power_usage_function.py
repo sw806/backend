@@ -20,11 +20,11 @@ class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedel
         self.extend_by = extend_by
 
     @property
-    def min_domain(self) -> TDomain:
+    def min_domain(self) -> timedelta:
         return timedelta()
 
     @property
-    def max_domain(self) -> TDomain:
+    def max_domain(self) -> timedelta:
         return super().max_domain + self.extend_by
 
     def get_domain(self, point: Tuple[timedelta, float]) -> timedelta:
@@ -89,7 +89,7 @@ class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedel
         self,
         min: timedelta, start: timedelta,
         max: timedelta, end: timedelta
-    ) -> TIntegral:
+    ) -> float:
         hours = (end - start).seconds / 3600
         start_point = self.discrete_point_at(start)
         return self.get_codomain(start_point) * hours

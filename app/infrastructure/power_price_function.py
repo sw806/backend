@@ -18,11 +18,11 @@ class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, flo
         self.spot_price_function = spot_price_function
 
     @property
-    def min_domain(self) -> TDomain:
+    def min_domain(self) -> Tuple[datetime, timedelta]:
         return (self.power_usage_function.min_domain, self.spot_price_function.min_domain)
 
     @property
-    def max_domain(self) -> TDomain:
+    def max_domain(self) -> Tuple[datetime, timedelta]:
         return (self.power_usage_function.max_domain, self.spot_price_function.max_domain)
 
     def get_domain(self, point: Tuple[datetime, timedelta]) -> Tuple[datetime, timedelta]:

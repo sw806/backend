@@ -10,7 +10,7 @@ class ScheduleTaskRequest:
     duration: int
     power: float
 
-    def __init__(self, duration: Optional[int], power: Optional[float]):
+    def __init__(self, duration: int, power: float):
         self.duration = duration
         self.power = power
 

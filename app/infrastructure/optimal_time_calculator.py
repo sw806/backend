@@ -24,7 +24,7 @@ class OptimalTimeCalculator:
 
         # Begin from earliest start time
         for i in range(len(price_points) - (no_of_intervals - 1)):
-            sum = 0
+            sum: float = 0.0
             for j in range(no_of_intervals):
                 if has_incomplete_interval and j != no_of_intervals - 1:
                     sum += price_points[i + j].price

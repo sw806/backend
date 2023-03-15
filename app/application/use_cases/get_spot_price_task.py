@@ -1,7 +1,7 @@
-import datetime
 import json
 import os.path
-from typing import Optional, List
+from datetime import datetime
+from typing import List
 from infrastructure import EdsRequests
 from infrastructure import PricePoint
 import os
@@ -22,7 +22,7 @@ class GetSpotPricesUseCase:
 
     def do(self, request: GetSpotPricesRequest) -> GetSpotPricesResponse:
         if not os.path.isfile("spot_prices.json"):
-            price_points = EdsRequests().get_prices(request.start_time)
+            price_points: List[PricePoint] = EdsRequests().get_prices(request.start_time)
             with open("spot_prices.json", "w") as file:
                 json.dump(price_points, file)
         else:
@@ -30,8 +30,8 @@ class GetSpotPricesUseCase:
                 lines = json.load(file)
                 price_points = []
                 for line in lines:
-                    price_points.append(PricePoint(datetime.datetime.fromisoformat(line["time"]), line["price"]))
-                if price_points[0].time.day <=  request.start_time.day and datetime.datetime.now().hour > 15:
+                    price_points.append(PricePoint(datetime.fromisoformat(line["time"]), line["price"]))
+                if price_points[0].time.day <=  request.start_time.day and datetime.now().hour > 15:
                     price_points = EdsRequests().get_prices(request.start_time)
                     with open("spot_prices.json", "w") as file:
                         json.dump(price_points, file)

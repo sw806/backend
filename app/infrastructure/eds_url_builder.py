@@ -51,7 +51,7 @@ class EdsUrlBuilder:
         else: self.filter[key] = [value]
         return self
 
-    def _format_datetime(time: datetime) -> str:
+    def _format_datetime(self, time: datetime) -> str:
         # isoformat includes seconds but EDS interprets it as an invalid format.
         # Eg. "2023-03-07T00:00:00" should be "2023-03-07T00:00"
         # For this reason we remove all unnecessary information by creating a new datetime.
@@ -61,7 +61,7 @@ class EdsUrlBuilder:
         )
         return corrected.isoformat()[:-3]
 
-    def _quote(list: List[Any], seperator: str, quote: str = '"') -> str:
+    def _quote(self, list: List[Any], seperator: str, quote: str = '"') -> str:
         quoted: List[str] = [quote + str(elem) + quote for elem in list]
         return seperator.join(quoted)
 
@@ -74,15 +74,15 @@ class EdsUrlBuilder:
         if not self.offset is None:
             parameters.append(f'offset={self.offset}')
         if not self.start is None:
-            parameters.append(f'start={EdsUrlBuilder._format_datetime(self.start)}')
+            parameters.append(f'start={self._format_datetime(self.start)}')
         if not self.end is None:
-            parameters.append(f'end={EdsUrlBuilder._format_datetime(self.end)}')
+            parameters.append(f'end={self._format_datetime(self.end)}')
         if not self.timezone is None:
             parameters.append(f'timezone={self.timezone}')
         if not self.sort is None:
             parameters.append(f'sort={self.sort}')
         if len(self.filter) > 0:
-            quoted_filter = [f'"{x}":[{EdsUrlBuilder._quote(self.filter[x], ",")}]' for x in self.filter]
+            quoted_filter = [f'"{x}":[{self._quote(self.filter[x], ",")}]' for x in self.filter]
             parameters.append(
                 'filter={' + ','.join(quoted_filter) + "}"
             )

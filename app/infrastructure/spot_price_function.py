@@ -51,7 +51,7 @@ class SpotPriceFunction(DiscreteFunction[datetime, float, float, PricePoint]):
 
         return super().next_discrete_point_from(min, argument, max)
 
-    def discrete_point_at(self, argument: datetime) -> TDiscretePoint:
+    def discrete_point_at(self, argument: datetime) -> PricePoint:
         if not self.is_valid_argument(argument):
             raise ValueError("The argument is outside the domain boundaries")
 
