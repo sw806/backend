@@ -2,8 +2,8 @@ import datetime
 import json
 import os.path
 from typing import Optional, List
-from infrastructure import EdsRequests
-from infrastructure import PricePoint
+from app.infrastructure import EdsRequests
+from app.infrastructure import PricePoint
 import os
 
 class GetSpotPricesRequest:
@@ -21,19 +21,22 @@ class GetSpotPricesUseCase:
         pass
 
     def do(self, request: GetSpotPricesRequest) -> GetSpotPricesResponse:
-        if not os.path.isfile("spot_prices.json"):
+        #file_path = "spot_prices.json"
+        file_path = os.path.join(os.path.dirname(__file__), "spot_prices.json")
+
+        if not os.path.isfile(file_path):
             price_points = EdsRequests().get_prices(request.start_time)
-            with open("spot_prices.json", "w") as file:
-                json.dump(price_points, file)
+            with open(file_path, "w") as file:
+                json.dump([price_point.to_dict() for price_point in price_points], file)
         else:
-            with open("spot_prices.json", "r") as file:
+            with open(file_path, "r") as file:
                 lines = json.load(file)
                 price_points = []
                 for line in lines:
                     price_points.append(PricePoint(datetime.datetime.fromisoformat(line["time"]), line["price"]))
                 if price_points[0].time.day <=  request.start_time.day and datetime.datetime.now().hour > 15:
                     price_points = EdsRequests().get_prices(request.start_time)
-                    with open("spot_prices.json", "w") as file:
+                    with open(file_path, "w") as file:
                         json.dump(price_points, file)
 
         return GetSpotPricesResponse(price_points)
@@ -41,5 +44,4 @@ class GetSpotPricesUseCase:
 
 if __name__ == '__main__':
     GetSpotPricesUseCase().do(GetSpotPricesRequest(datetime.datetime.now()))
-
     
