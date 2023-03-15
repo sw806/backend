@@ -131,7 +131,7 @@ class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, flo
         start: datetime,
         duration: timedelta,
         start_duration: timedelta = timedelta()
-    ):
+    ) -> float:
         return self.integrate(
             (start, start_duration),
             (start + duration, start_duration + duration)
