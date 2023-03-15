@@ -19,11 +19,25 @@ class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, flo
 
     @property
     def min_domain(self) -> Tuple[datetime, timedelta]:
-        return (self.power_usage_function.min_domain, self.spot_price_function.min_domain)
+        return (self.spot_price_function.min_domain, self.power_usage_function.min_domain)
 
     @property
     def max_domain(self) -> Tuple[datetime, timedelta]:
-        return (self.power_usage_function.max_domain, self.spot_price_function.max_domain)
+        return (self.spot_price_function.max_domain, self.power_usage_function.max_domain)
+
+    def domain_order(self, a: Tuple[datetime, timedelta], b: Tuple[datetime, timedelta]) -> int:
+        (a_time, a_delta) = a
+        (b_time, b_delta) = b
+        time_order = self.spot_price_function.domain_order(a_time, b_time)
+        delta_order = self.power_usage_function.domain_order(a_delta, b_delta)
+        if time_order == delta_order: return time_order
+        else: raise ValueError("Time and delta order was not the same")
+
+    def combine_integrals(self, a: float, b: float) -> float:
+        return a + b
+
+    def is_valid_argument(self, argument: Tuple[datetime, timedelta]) -> bool:
+        return argument >= self.min_domain and argument <= self.max_domain
 
     def get_domain(self, point: Tuple[datetime, timedelta]) -> Tuple[datetime, timedelta]:
         return point

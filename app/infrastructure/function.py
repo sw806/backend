@@ -1,8 +1,6 @@
-from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
-from typing import Generic, List, Optional, Tuple, TypeVar
+from abc import ABC, ABCMeta, abstractmethod
+from typing import Any, Generic, TypeVar
 
-from infrastructure.eletricity_prices import PricePoint
 
 TDomain = TypeVar("TDomain")
 TCodomain = TypeVar("TCodomain")

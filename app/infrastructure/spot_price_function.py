@@ -28,6 +28,15 @@ class SpotPriceFunction(DiscreteFunction[datetime, float, float, PricePoint]):
     def max_domain(self) -> datetime:
         return super().max_domain + self.extend_by
 
+    def domain_order(self, a: datetime, b: datetime) -> int:
+        return -1 if a < b else 0 if a == b else 1
+
+    def combine_integrals(self, a: float, b: float) -> float:
+        return a + b
+
+    def is_valid_argument(self, argument: datetime) -> bool:
+        return argument >= self.min_domain and argument <= self.max_domain
+
     def get_domain(self, point: PricePoint) -> datetime:
         return point.time
 

@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
 from datetime import timedelta
 from typing import Generic, List, Optional, TypeVar
-from infrastructure.function import TCodomain, TDomain, TIntegral
+from infrastructure.function import Function, TCodomain, TDomain, TIntegral
 
 
 TDiscretePoint = TypeVar("TDiscretePoint")
-class DiscreteFunction(ABC, Generic[TDomain, TCodomain, TIntegral, TDiscretePoint]):
+class DiscreteFunction(
+    Function[TDomain, TCodomain, TIntegral],
+    ABC,
+    Generic[TDomain, TCodomain, TIntegral, TDiscretePoint],
+):
     def __init__(
         self,
         set: List[TDiscretePoint]
@@ -29,8 +33,17 @@ class DiscreteFunction(ABC, Generic[TDomain, TCodomain, TIntegral, TDiscretePoin
     def max_domain(self) -> TDomain:
         return self.get_domain(self.set[-1])
 
-    def is_valid_argument(self, argument: timedelta) -> bool:
-        return argument >= self.min_domain and argument <= self.max_domain
+    @abstractmethod
+    def domain_order(self, a: TDomain, b: TDomain) -> int:
+        pass
+
+    @abstractmethod
+    def combine_integrals(self, a: TIntegral, b: TIntegral) -> TIntegral:
+        pass
+
+    @abstractmethod
+    def is_valid_argument(self, argument: TDomain) -> bool:
+        pass
 
     def discrete_point_at(self, argument: TDomain) -> TDiscretePoint:
         if not self.is_valid_argument(argument):
@@ -38,7 +51,7 @@ class DiscreteFunction(ABC, Generic[TDomain, TCodomain, TIntegral, TDiscretePoin
 
         previous: TDiscretePoint = self.set[0]
         for point in self.set[1:]:
-            if argument < self.get_domain(point):
+            if self.domain_order(argument, self.get_domain(point)) < 0:
                 return previous
             previous = point
 
@@ -53,8 +66,8 @@ class DiscreteFunction(ABC, Generic[TDomain, TCodomain, TIntegral, TDiscretePoin
         argument: TDomain,
         max: TDomain,
     ) -> Optional[TDiscretePoint]:
-        if argument < min: return None
-        if argument > max: return None
+        if self.domain_order(argument, min) < 0: return None
+        if self.domain_order(argument, max) > 0: return None
 
         point: TDiscretePoint = self.discrete_point_at(argument)
         index = self.set.index(point) + 1
@@ -77,9 +90,6 @@ class DiscreteFunction(ABC, Generic[TDomain, TCodomain, TIntegral, TDiscretePoin
         min: TDomain, start: TDomain,
         max: TDomain, end: TDomain
     ) -> TIntegral:
-        # This can often happen with the recursive calls when we have narrowed down "start", "mid", and "end" boundaries.
-        if start == end: return 0
-
         next_to_first_point = self.next_discrete_point_from(min, start, max)
 
         # We are in the same point, or
@@ -97,12 +107,16 @@ class DiscreteFunction(ABC, Generic[TDomain, TCodomain, TIntegral, TDiscretePoin
 
         next_to_last_point: TDiscretePoint = self.discrete_point_at(end)
         next_to_last_domain = self.get_domain(next_to_last_point)
-        next_to_first_domain = self.get_domain(next_to_first_point)
 
         # To keep the algorithm clear one can remove this check where the "start" and "middle" split can is condially computed.
         # This means that if "next_point" is "None" then "start_integral" and "middle_integral" is always "0".
-        start_integral = middle_integral = end_integral = 0
+        end_integral = self.integrate_helper(
+            min, next_to_last_domain,
+            max, end
+        )
+        integral = end_integral
         if not next_to_first_point is None:
+            next_to_first_domain = self.get_domain(next_to_first_point)
             start_integral = self.integrate_helper(
                 min, start,
                 max, next_to_first_domain
@@ -111,12 +125,12 @@ class DiscreteFunction(ABC, Generic[TDomain, TCodomain, TIntegral, TDiscretePoin
                 min, next_to_first_domain,
                 max, next_to_last_domain
             )
-        end_integral = self.integrate_helper(
-            min, next_to_last_domain,
-            max, end
-        )
+            integral = self.combine_integrals(
+                integral,
+                self.combine_integrals(start_integral, middle_integral)
+            )
 
-        return start_integral + middle_integral + end_integral
+        return integral
 
     def integrate(self, start: TDomain, end: TDomain) -> TIntegral:
         return self.integrate_helper(start, start, end, end)

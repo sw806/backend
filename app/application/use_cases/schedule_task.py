@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 from infrastructure import OptimalTimeCalculator, EdsRequests
 from pydantic.dataclasses import dataclass
 
@@ -22,8 +22,7 @@ class ScheduleTaskUseCase:
         pass
 
     def do(self, request: ScheduleTaskRequest) -> ScheduleTaskResponse:
-        #price_points = GetSpotPricesUseCase().do(GetSpotPricesRequest(datetime.datetime.now()))
-        price_points = EdsRequests().get_prices(datetime.datetime.now())
+        price_points = EdsRequests().get_prices(datetime.now())
         optimal_time = OptimalTimeCalculator()\
-            .calculate_optimal_time(price_points, request.power, datetime.timedelta(seconds=request.duration))
+            .calculate_optimal_time(price_points, timedelta(seconds=request.duration))
         return ScheduleTaskResponse(optimal_time)

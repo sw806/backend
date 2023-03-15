@@ -27,6 +27,15 @@ class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedel
     def max_domain(self) -> timedelta:
         return super().max_domain + self.extend_by
 
+    def domain_order(self, a: timedelta, b: timedelta) -> int:
+        return -1 if a < b else 0 if a == b else 1
+
+    def combine_integrals(self, a: float, b: float) -> float:
+        return a + b
+
+    def is_valid_argument(self, argument: timedelta) -> bool:
+        return argument >= self.min_domain and argument <= self.max_domain
+
     def get_domain(self, point: Tuple[timedelta, float]) -> timedelta:
         (delta, _) = point
         return delta

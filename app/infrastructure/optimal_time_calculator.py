@@ -1,5 +1,5 @@
 import math
-import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional
 from .eletricity_prices import PricePoint
 
@@ -8,9 +8,7 @@ class OptimalTimeCalculator:
     def __init__(self):
         pass
 
-    def calculate_optimal_time(self, price_points: List[PricePoint], power: Optional[int],
-                               duration: Optional[datetime.timedelta]) -> int:
-
+    def calculate_optimal_time(self, price_points: List[PricePoint], duration: timedelta) -> int:
         has_incomplete_interval = False
         no_of_complete_intervals = int(duration.seconds / 3600)
         size_of_incomplete_intervals = duration.seconds % 3600
@@ -20,7 +18,7 @@ class OptimalTimeCalculator:
         else:
             no_of_intervals = no_of_complete_intervals
         lowestSum = float('inf')
-        optimal_start_time = None
+        optimal_start_time: datetime = price_points[0].time
 
         # Begin from earliest start time
         for i in range(len(price_points) - (no_of_intervals - 1)):
@@ -48,6 +46,6 @@ class OptimalTimeCalculator:
                 if sum < lowestSum:
                     lowestSum = sum
                     optimal_start_time = price_points[i - no_of_intervals + 1].time + \
-                        (datetime.timedelta(hours=1) - datetime.timedelta(seconds=size_of_incomplete_intervals))
+                        (timedelta(hours=1) - timedelta(seconds=size_of_incomplete_intervals))
 
         return int(optimal_start_time.timestamp())

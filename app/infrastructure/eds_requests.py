@@ -9,7 +9,7 @@ class EdsRequests(ElectricityPrices):
     def __init__(self):
         pass
 
-    def get_prices(self, start: Optional[datetime], end: Optional[datetime] = None) -> List[PricePoint]:
+    def get_prices(self, start: Optional[datetime] = None, end: Optional[datetime] = None) -> List[PricePoint]:
         # Builds URL for Eds "Elspotprices" dataset.
         builder = EdsUrlBuilder("Elspotprices") \
             .add_to_filter("PriceArea", "DK1") \
