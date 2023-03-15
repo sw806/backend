@@ -1,4 +1,4 @@
-ci: req fmt db test
+ci: req fmt lint db test
 
 all: req fmt test dc
 
@@ -13,6 +13,9 @@ req:
 
 run:
 	python3 ./app/
+
+lint:
+	mypy .
 
 fmt:
 	python3 -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics

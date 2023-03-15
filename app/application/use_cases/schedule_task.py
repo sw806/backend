@@ -1,8 +1,8 @@
 import datetime
 from typing import Optional
-from app.infrastructure import OptimalTimeCalculator
+from infrastructure import OptimalTimeCalculator
 from pydantic.dataclasses import dataclass
-from app.application.use_cases.get_spot_price_task import GetSpotPricesRequest, GetSpotPricesUseCase
+from application.use_cases.get_spot_price_task import GetSpotPricesRequest, GetSpotPricesUseCase
 
 
 @dataclass

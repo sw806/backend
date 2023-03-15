@@ -2,14 +2,14 @@ import datetime
 import json
 import os.path
 from typing import Optional, List
-from app.infrastructure import EdsRequests
-from app.infrastructure import PricePoint
+from infrastructure import EdsRequests
+from infrastructure import PricePoint
 import os
 
 class GetSpotPricesRequest:
     start_time: datetime
 
-    def __init__(self, start_time: Optional[datetime]):
+    def __init__(self, start_time: datetime):
         self.start_time = start_time
 
 class GetSpotPricesResponse:

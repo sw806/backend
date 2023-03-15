@@ -10,4 +10,3 @@ async def schedule(request: ScheduleTaskRequest):
         return User().schedule_task(request)
     except Exception as e:
         return "Error: " + str(e)
-        return "Something went wrong!"
