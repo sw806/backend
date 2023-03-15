@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import List, Optional
-from app.infrastructure.discrete_function import DiscreteFunction, TDiscretePoint
+from infrastructure.discrete_function import DiscreteFunction, TDiscretePoint
 
-from app.infrastructure.eletricity_prices import PricePoint
+from infrastructure.eletricity_prices import PricePoint
 
 
 class SpotPriceFunction(DiscreteFunction[datetime, float, float, PricePoint]):

@@ -1,8 +1,8 @@
 from datetime import timedelta
 from typing import List, Optional, Tuple
-from app.infrastructure.discrete_function import DiscreteFunction
+from infrastructure.discrete_function import DiscreteFunction
 
-from app.infrastructure.function import TDomain, TIntegral
+from infrastructure.function import TDomain, TIntegral
 
 
 class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedelta, float]]):

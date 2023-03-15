@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import List, Tuple
 from random import random
 
-from app.infrastructure.power_usage_function import PowerUsageFunction
+from infrastructure.power_usage_function import PowerUsageFunction
 
 
 class TestPowerUsageFunction:

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import timedelta
 from typing import Generic, List, Optional, TypeVar
-from app.infrastructure.function import TCodomain, TDomain, TIntegral
+from infrastructure.function import TCodomain, TDomain, TIntegral
 
 
 TDiscretePoint = TypeVar("TDiscretePoint")

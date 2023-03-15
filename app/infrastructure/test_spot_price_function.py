@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from random import random
 from typing import List
-from app.infrastructure.eletricity_prices import PricePoint
-from app.infrastructure.spot_price_function import SpotPriceFunction
+from infrastructure.eletricity_prices import PricePoint
+from infrastructure.spot_price_function import SpotPriceFunction
 
 
 class TestSpotPriceFunction:

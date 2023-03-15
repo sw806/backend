@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Optional, Tuple
-from app.infrastructure.discrete_function import DiscreteFunction
+from infrastructure.discrete_function import DiscreteFunction
 
-from app.infrastructure.function import TDomain
-from app.infrastructure.power_usage_function import PowerUsageFunction
-from app.infrastructure.spot_price_function import SpotPriceFunction
+from infrastructure.function import TDomain
+from infrastructure.power_usage_function import PowerUsageFunction
+from infrastructure.spot_price_function import SpotPriceFunction
 
 
 class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, float, Tuple[datetime, timedelta]]):

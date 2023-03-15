@@ -4,10 +4,10 @@ from typing import List
 
 from click import Tuple
 
-from app.infrastructure.eletricity_prices import PricePoint
-from app.infrastructure.spot_price_function import SpotPriceFunction
-from app.infrastructure.power_usage_function import PowerUsageFunction
-from app.infrastructure.power_price_function import PowerPriceFunction
+from infrastructure.eletricity_prices import PricePoint
+from infrastructure.spot_price_function import SpotPriceFunction
+from infrastructure.power_usage_function import PowerUsageFunction
+from infrastructure.power_price_function import PowerPriceFunction
 
 
 class TestPowerPriceFunction:

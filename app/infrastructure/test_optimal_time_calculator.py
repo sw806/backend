@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List
-from app.infrastructure.eletricity_prices import PricePoint
-from app.infrastructure import OptimalTimeCalculator
+from infrastructure.eletricity_prices import PricePoint
+from infrastructure import OptimalTimeCalculator
 
 
 class TestOptimalTimeCalculator:

@@ -12,10 +12,10 @@ req:
 	pip install -r requirements.txt
 
 run:
-	python3 ./app/
+	cd ./app/; python3 .
 
 lint:
-	mypy . --follow-imports=skip
+	cd ./app/; mypy . --strict
 
 fmt:
 	python3 -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
