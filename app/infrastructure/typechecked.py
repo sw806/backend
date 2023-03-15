@@ -1,7 +1,6 @@
 from inspect import Parameter, Signature, signature
 from inspect import isfunction
-from typing import Any, Dict, Generic, List, TypeVar, get_args, get_origin
-from isinstance2 import isinstance2
+from typing import Any, Generic, TypeVar, get_args, get_origin
 
 
 def typechecked(f):
