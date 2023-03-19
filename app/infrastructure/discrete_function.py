@@ -38,6 +38,10 @@ class DiscreteFunction(
         pass
 
     @abstractmethod
+    def combine_codomains(self, a: TCodomain, b: TCodomain) -> TCodomain:
+        pass
+
+    @abstractmethod
     def combine_integrals(self, a: TIntegral, b: TIntegral) -> TIntegral:
         pass
 
@@ -76,6 +80,27 @@ class DiscreteFunction(
 
     def apply(self, argument: TDomain) -> TCodomain:
         return self.get_codomain(self.discrete_point_at(argument))
+
+    def sum_helper(
+        self,
+        min: TDomain, argument: TDomain, max: TDomain,
+    ) -> TCodomain:
+        current_codomain: TCodomain = self.apply(argument)
+
+        # Max is exclusive
+        if argument == max: return current_codomain
+
+        next_point: Optional[TDiscretePoint] = self.next_discrete_point_from(min, argument, max)
+        if next_point is None:
+            return current_codomain
+
+        next_domain: TDomain = self.get_domain(next_point)
+        return self.combine_codomains(
+            current_codomain, self.sum_helper(min, next_domain, max)
+        )
+
+    def sum(self, start: TDomain, end: TDomain) -> TCodomain:
+        return self.sum_helper(start, start, end)
 
     @abstractmethod
     def integral_over(

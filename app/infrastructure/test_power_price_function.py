@@ -515,3 +515,38 @@ class TestPowerPriceFunction:
         assert integral_1_3 == integral_2_3
         assert integral_1_4 == integral_2_4
         assert integral_1_total == integral_2_total
+
+    def test_sum_over_variable_sized_domains(self):
+        # Arrange
+        price_points: List[PricePoint] = [
+            PricePoint(datetime(2021, 1, 1, 15), 1),
+            PricePoint(datetime(2021, 1, 1, 15, 30), 2),
+            PricePoint(datetime(2021, 1, 1, 16), 3),
+            PricePoint(datetime(2021, 1, 1, 16, 30), 4),
+            PricePoint(datetime(2021, 1, 1, 17), 5),
+            PricePoint(datetime(2021, 1, 1, 17, 30), 6),
+            PricePoint(datetime(2021, 1, 1, 18), 7),
+            PricePoint(datetime(2021, 1, 1, 18, 30), 8)
+        ]
+        spot_price_function = SpotPriceFunction(price_points)
+        power_points: List[Tuple[timedelta, float]] = [
+            (timedelta(hours=0), 1),
+            (timedelta(hours=1), 2),
+            (timedelta(hours=2), 3),
+            (timedelta(hours=3), 4),
+            (timedelta(hours=4), 5),
+            (timedelta(hours=5), 6),
+            (timedelta(hours=6), 7),
+            (timedelta(hours=7), 8)
+        ]
+        power_usage_function = PowerUsageFunction(power_points)
+        power_price_function = PowerPriceFunction(power_usage_function, spot_price_function)
+
+        # Act
+        sum = power_price_function.sum(
+            (datetime(2021, 1, 1, 15), timedelta(hours=0)),
+            (datetime(2021, 1, 1, 15, 30), timedelta(minutes=30))
+        )
+
+        # Assert
+        assert sum == 3

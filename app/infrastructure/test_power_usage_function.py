@@ -156,3 +156,139 @@ class TestPowerUsageFunction:
 
         # Assert
         assert integral == 2
+
+    def test_sum_single_power_point(self):
+        # Arrange
+        power_points: List[Tuple[timedelta, float]] = [
+            (timedelta(hours=1), 1),
+            (timedelta(hours=2), 2),
+            (timedelta(hours=3), 3),
+            (timedelta(hours=4), 4),
+            (timedelta(hours=5), 5),
+            (timedelta(hours=6), 6),
+            (timedelta(hours=7), 7),
+            (timedelta(hours=8), 8)
+        ]
+        power_usage_function = PowerUsageFunction(power_points)
+
+        # Act
+        sum = power_usage_function.sum(
+            timedelta(hours=1), timedelta(hours=1)
+        )
+
+        # Assert
+        assert sum == 1
+
+    def test_sum_between_two_power_points(self):
+        # Arrange
+        power_points: List[Tuple[timedelta, float]] = [
+            (timedelta(hours=1), 1),
+            (timedelta(hours=2), 2),
+            (timedelta(hours=3), 3),
+            (timedelta(hours=4), 4),
+            (timedelta(hours=5), 5),
+            (timedelta(hours=6), 6),
+            (timedelta(hours=7), 7),
+            (timedelta(hours=8), 8)
+        ]
+        power_usage_function = PowerUsageFunction(power_points)
+
+        # Act
+        sum = power_usage_function.sum(
+            timedelta(hours=1), timedelta(hours=1, minutes=30)
+        )
+
+        # Assert
+        assert sum == 3
+
+
+    def test_sum_two_power_points(self):
+        # Arrange
+        power_points: List[Tuple[timedelta, float]] = [
+            (timedelta(hours=1), 1),
+            (timedelta(hours=2), 2),
+            (timedelta(hours=3), 3),
+            (timedelta(hours=4), 4),
+            (timedelta(hours=5), 5),
+            (timedelta(hours=6), 6),
+            (timedelta(hours=7), 7),
+            (timedelta(hours=8), 8)
+        ]
+        power_usage_function = PowerUsageFunction(power_points)
+
+        # Act
+        sum = power_usage_function.sum(
+            timedelta(hours=1), timedelta(hours=2)
+        )
+
+        # Assert
+        assert sum == 3
+
+    def test_sum_over_all_power_points(self):
+        # Arrange
+        power_points: List[Tuple[timedelta, float]] = [
+            (timedelta(hours=1), 1),
+            (timedelta(hours=2), 2),
+            (timedelta(hours=3), 3),
+            (timedelta(hours=4), 4),
+            (timedelta(hours=5), 5),
+            (timedelta(hours=6), 6),
+            (timedelta(hours=7), 7),
+            (timedelta(hours=8), 8)
+        ]
+        power_usage_function = PowerUsageFunction(power_points, extend_by=timedelta(hours=0))
+
+        # Act
+        sum = power_usage_function.sum(
+            power_usage_function.min_domain, power_usage_function.max_domain
+        )
+
+        # Assert
+        assert sum == 37
+
+    def test_sum_over_all_power_points_extended_one_hour(self):
+        # Arrange
+        power_points: List[Tuple[timedelta, float]] = [
+            (timedelta(hours=1), 1),
+            (timedelta(hours=2), 2),
+            (timedelta(hours=3), 3),
+            (timedelta(hours=4), 4),
+            (timedelta(hours=5), 5),
+            (timedelta(hours=6), 6),
+            (timedelta(hours=7), 7),
+            (timedelta(hours=8), 8)
+        ]
+        power_usage_function = PowerUsageFunction(power_points, extend_by=timedelta(hours=1))
+
+        # Act
+        sum = power_usage_function.sum(
+            power_usage_function.min_domain, power_usage_function.max_domain
+        )
+
+        # Assert
+        assert sum == 45
+    
+    def test_random_sum_over_power_points(self):
+        # Arrange
+        power_points: List[Tuple[timedelta, float]] = [
+            (timedelta(hours=1), 1),
+            (timedelta(hours=2), 1),
+            (timedelta(hours=3), 1),
+            (timedelta(hours=4), 1),
+            (timedelta(hours=5), 1),
+            (timedelta(hours=6), 1),
+            (timedelta(hours=7), 1),
+            (timedelta(hours=8), 1)
+        ]
+        power_usage_function = PowerUsageFunction(power_points, extend_by=timedelta(hours=1))
+
+        for _ in range(1000):
+            # Act
+            hours = int(5 * random())
+            expected = 1 + (1 * hours)
+            sum = power_usage_function.sum(
+                power_usage_function.min_domain, power_usage_function.min_domain + timedelta(hours=hours)
+            )
+
+            # Assert
+            assert sum == expected

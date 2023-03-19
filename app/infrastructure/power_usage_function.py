@@ -30,6 +30,9 @@ class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedel
     def domain_order(self, a: timedelta, b: timedelta) -> int:
         return -1 if a < b else 0 if a == b else 1
 
+    def combine_codomains(self, a: float, b: float) -> float:
+        return a + b
+
     def combine_integrals(self, a: float, b: float) -> float:
         return a + b
 

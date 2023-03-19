@@ -33,6 +33,9 @@ class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, flo
         if time_order == delta_order: return time_order
         else: raise ValueError("Time and delta order was not the same")
 
+    def combine_codomains(self, a: float, b: float) -> float:
+        return a + b
+
     def combine_integrals(self, a: float, b: float) -> float:
         return a + b
 

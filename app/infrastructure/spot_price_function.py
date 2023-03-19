@@ -31,6 +31,9 @@ class SpotPriceFunction(DiscreteFunction[datetime, float, float, PricePoint]):
     def domain_order(self, a: datetime, b: datetime) -> int:
         return -1 if a < b else 0 if a == b else 1
 
+    def combine_codomains(self, a: float, b: float) -> float:
+        return a + b
+
     def combine_integrals(self, a: float, b: float) -> float:
         return a + b
 
