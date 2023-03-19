@@ -28,6 +28,11 @@ class SpotPriceFunction(DiscreteFunction[datetime, float, float, PricePoint]):
     def max_domain(self) -> datetime:
         return super().max_domain + self.extend_by
 
+    @property
+    def min_step(self) -> timedelta:
+        # Spot prices are in one hour intervals.
+        return self.extend_by if self.extend_by < timedelta(hours=1) else timedelta(hours=1)
+
     def domain_order(self, a: datetime, b: datetime) -> int:
         return -1 if a < b else 0 if a == b else 1
 

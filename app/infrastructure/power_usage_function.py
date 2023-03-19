@@ -11,13 +11,24 @@ class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedel
         power_points: List[Tuple[timedelta, float]],
         extend_by: timedelta = timedelta(hours=1)
     ) -> None:
+        super().__init__(power_points)
         # If the power points are missing the first point (min domain) then add it
         (first_time, first_power) = power_points[0]
         if first_time > self.min_domain:
             power_points.insert(0, (self.min_domain, first_power))
 
-        super().__init__(power_points)
+        min_step = extend_by
+        (last_time, _) = power_points[0]
+        for (curr_time, _) in power_points[1:]:
+            step = curr_time - last_time
+            if step < min_step: min_step = step
+
+        self._min_step = min_step
         self.extend_by = extend_by
+
+    @property
+    def min_step(self) -> timedelta:
+        return self._min_step
 
     @property
     def min_domain(self) -> timedelta:
@@ -83,7 +94,7 @@ class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedel
 
     @property
     def duration(self) -> timedelta:
-        return self.min_domain - self.max_domain
+        return self.max_domain - self.min_domain
 
 
     def apply(self, argument: timedelta) -> float:

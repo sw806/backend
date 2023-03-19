@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from typing import Optional, Tuple
 from infrastructure.discrete_function import DiscreteFunction
 
-from infrastructure.function import TDomain
 from infrastructure.power_usage_function import PowerUsageFunction
 from infrastructure.spot_price_function import SpotPriceFunction
 
@@ -16,6 +15,10 @@ class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, flo
         super().__init__([])
         self.power_usage_function = power_usage_function
         self.spot_price_function = spot_price_function
+
+    @property
+    def min_step(self) -> timedelta:
+        return min(self.power_usage_function.min_step, self.spot_price_function.min_step)
 
     @property
     def min_domain(self) -> Tuple[datetime, timedelta]:
@@ -100,6 +103,7 @@ class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, flo
         # The new time and delta is then stepping by smallest step.
         new_time = min_time + smallest_step
         new_delta = min_delta + smallest_step
+
 
         return (new_time, new_delta)
 
