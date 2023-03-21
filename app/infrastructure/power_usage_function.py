@@ -70,8 +70,10 @@ class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedel
         if argument >= last_time:
             # Check if delta is inside acceptable bounds.
             delta = argument - last_time
-            if delta <= self.extend_by:
+            if delta < self.extend_by:
                 return (self.max_domain, self.get_codomain(last_point))
+            else:
+                return None
 
         return super().next_discrete_point_from(min, argument, max)
 
