@@ -61,6 +61,31 @@ class DiscreteFunction(
 
         raise Exception("Unknown error")
 
+    def get_all_discrete_points(
+        self,
+        start_domain: Optional[TDomain] = None,
+        end_domain: Optional[TDomain] = None
+    ) -> List[TDiscretePoint]:
+        if start_domain is None: start_domain = self.min_domain
+        if end_domain is None: end_domain = self.max_domain
+
+        points: List[TDiscretePoint] = []
+
+        current_domain = start_domain
+        current_point = self.discrete_point_at(current_domain)
+
+        while self.domain_order(current_domain, end_domain) < 0:
+            points.append(current_point)
+
+            current_domain = self.get_domain(current_point)
+            current_point = self.next_discrete_point_from(
+                start_domain, current_domain, end_domain
+            )
+
+            if current_point is None: break
+
+        return points
+
     def is_in_same_discrete_point(self, min: TDomain, a: TDomain, b: TDomain, max: TDomain) -> bool:
         return self.discrete_point_at(a) == self.discrete_point_at(b)
 

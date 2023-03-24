@@ -1,10 +1,98 @@
 from datetime import datetime, timedelta
 from typing import List
-from infrastructure.scheduler_v2 import DatetimeInterval, Schedule, ScheduledTask, Scheduler, Task
+from infrastructure.scheduler_v2 import DatetimeInterval, DiscreteFunctionIterator, Schedule, ScheduledTask, Scheduler, Task
 from infrastructure.power_usage_function import PowerUsageFunction
 from infrastructure.eletricity_prices import PricePoint
 from infrastructure.spot_price_function import SpotPriceFunction
 
+
+class TestDiscreteFunctionIterator:
+    def test_single_function_min_domain_start(self):
+        # Arrange
+        power_function = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=20), 1),
+        ], timedelta(hours=1))
+        iterator = DiscreteFunctionIterator([power_function])
+        points = []
+
+        # Act
+        for point in iterator:
+            points.append(point)
+
+        # Assert
+        assert len(points) == 3
+        assert points[0] == timedelta()
+        assert points[1] == timedelta(minutes=20)
+        assert points[2] == timedelta(hours=1, minutes=20)
+
+    def test_two_functions_same_points_min_domain_start(self):
+        # Arrange
+        power_function = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=20), 1),
+        ], timedelta(hours=1))
+        iterator = DiscreteFunctionIterator([power_function, power_function])
+        points = []
+
+        # Act
+        for point in iterator:
+            points.append(point)
+
+        # Assert
+        assert len(points) == 3
+        assert points[0] == timedelta()
+        assert points[1] == timedelta(minutes=20)
+        assert points[2] == timedelta(hours=1, minutes=20)
+
+    def test_two_functions_different_points_min_domain_start(self):
+        # Arrange
+        power_function_0 = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=20), 1),
+        ], timedelta(hours=1))
+        power_function_1 = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=15), 1),
+        ], timedelta(hours=2))
+        iterator = DiscreteFunctionIterator([power_function_0, power_function_1])
+        points = []
+
+        # Act
+        for point in iterator:
+            points.append(point)
+
+        # Assert
+        assert len(points) == 5
+        assert points[0] == timedelta()
+        assert points[1] == timedelta(minutes=15)
+        assert points[2] == timedelta(minutes=20)
+        assert points[3] == timedelta(hours=1, minutes=20)
+        assert points[4] == timedelta(hours=2, minutes=15)
+
+    def test_two_functions_different_points_min_domain_start(self):
+        # Arrange
+        power_function_0 = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=20), 1),
+        ], timedelta(hours=1))
+        power_function_1 = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=20), 1),
+        ], timedelta(hours=2))
+        iterator = DiscreteFunctionIterator([power_function_0, power_function_1])
+        points = []
+
+        # Act
+        for point in iterator:
+            points.append(point)
+
+        # Assert
+        assert len(points) == 4
+        assert points[0] == timedelta()
+        assert points[1] == timedelta(minutes=20)
+        assert points[2] == timedelta(hours=1, minutes=20)
+        assert points[3] == timedelta(hours=2, minutes=20)
 
 class TestSchedulerV2:
     def test_get_available_start_times_half_hour_none_scheduled(self):
@@ -22,7 +110,7 @@ class TestSchedulerV2:
         task = Task(power_usage_function)
 
         # Act
-        start_points = scheduler.get_available_start_times(task)
+        start_points = scheduler.get_all_possible_start_times(task)
 
         # Assert
         assert len(start_points) == 4
@@ -46,7 +134,7 @@ class TestSchedulerV2:
         task = Task(power_usage_function)
 
         # Act
-        start_points = scheduler.get_available_start_times(task)
+        start_points = scheduler.get_all_possible_start_times(task)
 
         # Assert
         assert len(start_points) == 2
@@ -68,7 +156,7 @@ class TestSchedulerV2:
         task = Task(power_usage_function)
 
         # Act
-        start_points = scheduler.get_available_start_times(task)
+        start_points = scheduler.get_all_possible_start_times(task)
 
         # Assert
         assert len(start_points) == 2
@@ -96,7 +184,7 @@ class TestSchedulerV2:
         schedule = Schedule([scheduled_task])
 
         # Act
-        start_points = scheduler.get_available_start_times(task, schedule)
+        start_points = scheduler.get_all_possible_start_times(task, schedule)
 
         # Assert
         assert len(start_points) == 6
@@ -127,7 +215,7 @@ class TestSchedulerV2:
         schedule = Schedule([scheduled_task])
 
         # Act
-        start_points = scheduler.get_available_start_times(task, schedule)
+        start_points = scheduler.get_all_possible_start_times(task, schedule)
 
         # Assert
         assert len(start_points) == 3
@@ -155,7 +243,7 @@ class TestSchedulerV2:
         schedule = Schedule([scheduled_task])
 
         # Act
-        start_points = scheduler.get_available_start_times(task, schedule)
+        start_points = scheduler.get_all_possible_start_times(task, schedule)
 
         # Assert
         assert len(start_points) == 2
@@ -179,7 +267,7 @@ class TestSchedulerV2:
         schedule = Schedule([])
 
         # Act
-        start_points = scheduler.get_available_start_times(task, schedule)
+        start_points = scheduler.get_all_possible_start_times(task, schedule)
 
         # Assert
         assert len(start_points) == 9
