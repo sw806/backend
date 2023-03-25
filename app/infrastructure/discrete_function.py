@@ -78,11 +78,12 @@ class DiscreteFunction(
             points.append(current_point)
 
             current_domain = self.get_domain(current_point)
-            current_point = self.next_discrete_point_from(
+            next_point = self.next_discrete_point_from(
                 start_domain, current_domain, end_domain
             )
 
-            if current_point is None: break
+            if next_point is None: break
+            current_point = next_point
 
         return points
 

@@ -9,9 +9,48 @@ from infrastructure.power_price_function import PowerPriceFunction
 from infrastructure.spot_price_function import SpotPriceFunction
 from infrastructure.power_usage_function import PowerUsageFunction
 
+class TaskValidator(ABC):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def datetimes_of_interest(self, task: Task, start_time: datetime) -> List[datetime]:
+        return []
+
+    @abstractmethod
+    def validate(self, task: Task, start_time: datetime) -> bool:
+        pass
+
+class MustStartBetweenValidator(TaskValidator):
+    def __init__(self, start_time_interval: DatetimeInterval) -> None:
+        super().__init__()
+        self.start_time_interval = start_time_interval
+    
+    def datetimes_of_interest(self, task: Task, start_time: datetime) -> List[datetime]:
+        return [self.start_time_interval.start, self.start_time_interval.end]
+
+    def validate(self, task: Task, start_time: datetime) -> bool:
+        return start_time >= self.start_time_interval.start and \
+            start_time <= self.start_time_interval.end
+
+class MustEndBetweenValidator(TaskValidator):
+    def __init__(self, end_time_interval: DatetimeInterval) -> None:
+        super().__init__()
+        self.end_time_interval = end_time_interval
+    
+    def datetimes_of_interest(self, task: Task, start_time: datetime) -> List[datetime]:
+        return [self.end_time_interval.start, self.end_time_interval.end]
+
+    def validate(self, task: Task, start_time: datetime) -> bool:
+        end_time = start_time + task.duration
+        return end_time >= self.end_time_interval.start and \
+            end_time <= self.end_time_interval.end
+
 class ScheduleValidator(ABC):
     def __init__(self) -> None:
         super().__init__()
+
+    def datetimes_of_interest(self, schedule: Schedule, task: Task, start_time: datetime) -> List[datetime]:
+        return []
 
     @abstractmethod
     def validate(self, schedule: Schedule, task: Task, start_time: datetime) -> bool:
@@ -21,9 +60,76 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
     def __init__(self, maximum_consumption: float) -> None:
         super().__init__()
         self.maximum_consumption = maximum_consumption
-    
+
+    def power_consumption_at(self, tasks: List[ScheduledTask], time: datetime) -> float:
+        power_consumption = 0.0
+        for scheduled_task in tasks:
+            power_consumption += scheduled_task.get_power_consumption_at(time)
+        return power_consumption
+
+    def next_power_consumption_from(self, tasks: List[ScheduledTask], time: datetime) -> Optional[datetime]:
+        next = None
+
+        for scheduled_task in tasks:
+            # Check if the schedule is running at the given "time".
+            if not scheduled_task.runs_at(time):
+                continue
+
+            # We know it is running then we have to get the succeeding point from the given "time".
+            runtime = time - scheduled_task.start_interval.start
+            next_point = scheduled_task.task.power_usage_function.next_discrete_point_from(
+                scheduled_task.task.power_usage_function.min_domain, runtime, scheduled_task.task.power_usage_function.max_domain
+            )
+
+            # It might be that there are no succeeding point from the given "time".
+            if next_point is None:
+                continue
+
+            # There was a next point but we have to check if the task is running.
+            #   The complex reason for this is that the end time of the task is exclusive to its running time.
+            #   This solves the problem of starting a task immediately when a task finish.
+            #   If we did not do this then there sum time immediately at the start and finish could easily exceed the limit.
+            next_domain = scheduled_task.task.power_usage_function.get_domain(next_point)
+            next_datetime = time + next_domain
+            if not scheduled_task.runs_at(next_datetime):
+                continue
+
+            # However, if there was one we have to check if that is the "closest" if so then we replace "next" with it.
+            if next is None or next_datetime < next:
+                next = next_datetime
+
+        return next
+
     def validate(self, schedule: Schedule, task: Task, start_time: datetime) -> bool:
-        return super().validate(schedule, task, start_time)
+        current_time = start_time
+        while not current_time is None:
+            # Calculate runtime for task to schedule and check if it exceeds the task's duration.
+            runtime = current_time - start_time
+            if runtime > task.duration:
+                break
+
+            # Get the task power consumption.
+            task_consumption = task.power_usage_function.apply(runtime)
+
+            # Get power consumption at the current time.
+            established_consumption = self.power_consumption_at(schedule.tasks, current_time)
+            total_consumption = established_consumption + task_consumption
+            
+            # Check if we exceed the limit.
+            if total_consumption > self.maximum_consumption:
+                return False
+
+            # We did not exceed the power consumption limit so we proceed to the next point.
+            next_time = self.next_power_consumption_from(
+                schedule.tasks, current_time
+            )
+
+            # Check if there was one if so then set current to be that.
+            if next_time is None:
+                break
+            current_time = next_time
+
+        return True
 
 class DiscreteFunctionIterator(Iterator, Generic[TDomain, TCodomain, TIntegral, TDiscretePoint]):
     current: Optional[TDomain]
@@ -37,12 +143,12 @@ class DiscreteFunctionIterator(Iterator, Generic[TDomain, TCodomain, TIntegral, 
         self.functions = functions
 
         # If start is None then it is the min domain for all functions.
-        if len(functions) > 0:
-            if start is None:
-                start = functions[0].min_domain
-            if end is None:
-                end = functions[0].max_domain
+        if start is None:
+            start = functions[0].min_domain
+        if end is None:
+            end = functions[0].max_domain
 
+        if len(functions) > 0:
             for function in functions[1:]:
                 if not start is None:
                     min_domain = function.min_domain
@@ -136,6 +242,13 @@ class ScheduledTask:
         self.start_interval = start_interval
         self.task = task
 
+    @property
+    def end_interval(self) -> DatetimeInterval:
+        return DatetimeInterval(
+            self.start_interval.start + self.task.duration,
+            self.start_interval.duration
+        )
+
     def runs_at(self, time: datetime) -> bool:
         earliest_start_time = self.start_interval.start
         last_end_time = (earliest_start_time + self.start_interval.duration) + self.task.duration
@@ -184,26 +297,14 @@ class Schedule:
             total_price += task.get_price(price_function)
         return total_price
 
-    def power_consumption_at(self, time: datetime) -> float:
-        power_consumption = 0
-        for scheduled_task in self.tasks:
-            power_consumption += scheduled_task.get_power_consumption_at(time)
-        return power_consumption
-
     def can_schedule_task_at(self, task: Task, start_time: datetime) -> bool:
         # TODO: Use the validator pattern here.
         if not task.is_scheduleable_at(start_time):
             return False
 
         # Check that we dont exceed the maximum power consumption.
-        total_consumption = 0
-        for scheduled_task in self.tasks:
-            # Add the consumption of the scheduled task.
-            total_consumption += scheduled_task.get_power_consumption_at(start_time)
-
-            # Check if the new total consumption exceeds the limit.
-            if total_consumption > 2:
-                return False
+        if not MaximumPowerConsumptionValidator(3).validate(self, task, start_time):
+            return False
 
         return True
 

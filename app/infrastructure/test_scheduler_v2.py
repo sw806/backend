@@ -1,10 +1,180 @@
 from datetime import datetime, timedelta
 from typing import List
-from infrastructure.scheduler_v2 import DatetimeInterval, DiscreteFunctionIterator, Schedule, ScheduledTask, Scheduler, Task
+from infrastructure.scheduler_v2 import DatetimeInterval, DiscreteFunctionIterator, MaximumPowerConsumptionValidator, Schedule, ScheduledTask, Scheduler, Task
 from infrastructure.power_usage_function import PowerUsageFunction
 from infrastructure.eletricity_prices import PricePoint
 from infrastructure.spot_price_function import SpotPriceFunction
 
+
+class TestMaximumPowerConsumptionValidator:
+    def test_power_consumption_at_single_task_at_start(self):
+        # Arrange
+        expected = 0
+        power_function = PowerUsageFunction([
+            (timedelta(), expected),
+            (timedelta(minutes=20), 1),
+        ], timedelta(hours=1))
+        validator = MaximumPowerConsumptionValidator(3)
+        task0 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 12, 19), timedelta()),
+            Task(power_function)
+        )
+
+        # Act
+        actual = validator.power_consumption_at(
+            [task0], datetime(2021, 12, 19)
+        )
+
+        # Assert
+        assert actual == expected
+
+    def test_power_consumption_at_single_task_at_second_point(self):
+        # Arrange
+        expected = 0
+        power_function = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=20), expected),
+        ], timedelta(hours=1))
+        validator = MaximumPowerConsumptionValidator(3)
+        task0 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 12, 19), timedelta()),
+            Task(power_function)
+        )
+
+        # Act
+        actual = validator.power_consumption_at(
+            [task0], datetime(2021, 12, 19) + timedelta(minutes=20)
+        )
+
+        # Assert
+        assert actual == expected
+
+    def test_power_consumption_at_single_task_at_end(self):
+        # Arrange
+        power_function = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=20), 1),
+        ], timedelta(hours=1))
+        validator = MaximumPowerConsumptionValidator(3)
+        task0 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 12, 19), timedelta()),
+            Task(power_function)
+        )
+
+        # Act
+        actual = validator.power_consumption_at(
+            [task0], task0.end_interval.end
+        )
+
+        # Assert
+        assert actual == 0
+
+    def test_next_power_consumption_from_at_single_task_at_start(self):
+        # Arrange
+        expected = datetime(2021, 12, 19) + timedelta(minutes=20)
+        power_function = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=20), 1),
+        ], timedelta(hours=1))
+        validator = MaximumPowerConsumptionValidator(3)
+        task0 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 12, 19), timedelta()),
+            Task(power_function)
+        )
+
+        # Act
+        actual = validator.next_power_consumption_from(
+            [task0], datetime(2021, 12, 19)
+        )
+
+        # Assert
+        assert actual == expected
+
+    def test_next_power_consumption_from_at_single_task_at_second_point(self):
+        # Arrange
+        power_function = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=20), 1),
+        ], timedelta(hours=1))
+        validator = MaximumPowerConsumptionValidator(3)
+        task0 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 12, 19), timedelta()),
+            Task(power_function)
+        )
+
+        # Act
+        actual = validator.next_power_consumption_from(
+            [task0], datetime(2021, 12, 19) + timedelta(minutes=20)
+        )
+
+        # Assert
+        assert actual == None
+
+    def test_next_power_consumption_from_at_single_task_at_end(self):
+        # Arrange
+        power_function = PowerUsageFunction([
+            (timedelta(), 0),
+            (timedelta(minutes=20), 1),
+        ], timedelta(hours=1))
+        validator = MaximumPowerConsumptionValidator(3)
+        task0 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 12, 19), timedelta()),
+            Task(power_function)
+        )
+
+        # Act
+        actual = validator.next_power_consumption_from(
+            [task0], task0.end_interval.end
+        )
+
+        # Assert
+        assert actual is None
+
+    def test_validate_exceeds(self):
+        # Arrange
+        power_function = PowerUsageFunction([
+            (timedelta(), 1.2),
+        ], timedelta(hours=1))
+        validator = MaximumPowerConsumptionValidator(3)
+        task0 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 12, 19, 10), timedelta()),
+            Task(power_function)
+        )
+        task1 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 12, 19, 10), timedelta()),
+            Task(power_function)
+        )
+        schedule = Schedule([task0, task1])
+        task = Task(power_function)
+
+        # Act
+        actual = validator.validate(schedule, task, datetime(2021, 12, 19, 10))
+
+        # Assert
+        assert actual == False
+
+    def test_validate_exceeds(self):
+        # Arrange
+        power_function = PowerUsageFunction([
+            (timedelta(), 1.2),
+        ], timedelta(hours=1))
+        validator = MaximumPowerConsumptionValidator(3)
+        task0 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 12, 19, 10), timedelta()),
+            Task(power_function)
+        )
+        task1 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 12, 19, 10), timedelta()),
+            Task(power_function)
+        )
+        schedule = Schedule([task0, task1])
+        task = Task(power_function)
+
+        # Act
+        actual = validator.validate(schedule, task, datetime(2021, 12, 19, 11))
+
+        # Assert
+        assert actual == True
 
 class TestDiscreteFunctionIterator:
     def test_single_function_min_domain_start(self):
@@ -70,7 +240,7 @@ class TestDiscreteFunctionIterator:
         assert points[3] == timedelta(hours=1, minutes=20)
         assert points[4] == timedelta(hours=2, minutes=15)
 
-    def test_two_functions_different_points_min_domain_start(self):
+    def test_two_functions_different_points_min_domain_start_overlapping(self):
         # Arrange
         power_function_0 = PowerUsageFunction([
             (timedelta(), 0),
