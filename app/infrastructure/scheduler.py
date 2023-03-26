@@ -1,17 +1,12 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from typing import Generic, List, Optional
-from collections.abc import Iterator
+from typing import List, Optional
+
 from infrastructure.datetime_interval import DatetimeInterval
 from infrastructure.schedule import Schedule
 from infrastructure.schedule_task import ScheduledTask
 from infrastructure.task import Task
-from infrastructure.function import TDomain, TCodomain, TIntegral
-from infrastructure.discrete_function import DiscreteFunction, TDiscretePoint
-from infrastructure.power_price_function import PowerPriceFunction
 from infrastructure.spot_price_function import SpotPriceFunction
-from infrastructure.power_usage_function import PowerUsageFunction
 
 
 class Scheduler:
@@ -37,6 +32,10 @@ class Scheduler:
             for scheduled_task in schedule.tasks:
                 for relevant_time in scheduled_task.derieve_start_times():
                     seed_datetimes.append(relevant_time)
+
+        # The task can possibly also be cosntrained in such a way that it has custom starting points.
+        for start_time in task.start_times():
+            seed_datetimes.append(start_time)
 
         # Calculate all the relevant datetimes for the task relvative to the seeds.
         relevant_datetimes = []
@@ -81,7 +80,7 @@ class Scheduler:
     def schedule_tasks_starting_with(
         self,
         seed_task: Task,
-        tasks: List[Task],
+        tasks: List[Task] = [],
         base_schedule: Schedule = Schedule()
     ) -> List[Schedule]:
         schedules: List[Schedule] = self.schedule_task_for(seed_task, base_schedule)
@@ -108,10 +107,10 @@ class Scheduler:
     def schedule_tasks(
         self,
         tasks: List[Task],
-        base_schedule: Schedule = Schedule()
+        schedule: Schedule = Schedule()
     ) -> List[Schedule]:
         schedules: List[Schedule] = []
         for seed_task in tasks:
-            for schedule in self.schedule_tasks_starting_with(seed_task, tasks, base_schedule):
+            for schedule in self.schedule_tasks_starting_with(seed_task, tasks, schedule):
                 schedules.append(schedule)
         return schedules

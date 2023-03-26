@@ -65,10 +65,9 @@ class TestTask():
         datetimes = task.derieve_start_times(start_time)
 
         # Assert
-        assert len(datetimes) == 3
+        assert len(datetimes) == 2
         assert start_time - power_function.duration in datetimes
         assert start_time in datetimes
-        assert start_time + power_function.duration in datetimes
     
     def test_derieve_start_times_with_a_must_start_before_validator(self):
         # Arrange

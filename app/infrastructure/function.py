@@ -1,5 +1,5 @@
-from abc import ABC, ABCMeta, abstractmethod
-from typing import Any, Generic, TypeVar
+from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
 
 TDomain = TypeVar("TDomain")

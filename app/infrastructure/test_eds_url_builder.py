@@ -23,8 +23,6 @@ class TestEdsEndpointBuilder:
         # Act
         url = builder.build()
 
-        print(url)
-
         # Assert
         assert url == f'https://api.energidataservice.dk/dataset/{dataset}' + '?filter={"PriceArea":["DK1"]}'
 
@@ -39,8 +37,6 @@ class TestEdsEndpointBuilder:
         # Act
         url = builder.build()
 
-        print(url)
-
         # Assert
         assert url == f'https://api.energidataservice.dk/dataset/{dataset}' + '?filter={"PriceArea":["DK1","DK2"]}'
 
@@ -52,8 +48,6 @@ class TestEdsEndpointBuilder:
 
         # Act
         url = builder.build()
-
-        print(url)
 
         # Assert
         assert url == f'https://api.energidataservice.dk/dataset/{dataset}?start=2023-03-07T00:00'
@@ -67,8 +61,6 @@ class TestEdsEndpointBuilder:
         # Act
         url = builder.build()
 
-        print(url)
-
         # Assert
         assert url == f'https://api.energidataservice.dk/dataset/{dataset}?end=2023-03-07T00:00'
 
@@ -80,8 +72,6 @@ class TestEdsEndpointBuilder:
 
         # Act
         url = builder.build()
-
-        print(url)
 
         # Assert
         assert url == f'https://api.energidataservice.dk/dataset/{dataset}?limit=100'
@@ -95,8 +85,6 @@ class TestEdsEndpointBuilder:
         # Act
         url = builder.build()
 
-        print(url)
-
         # Assert
         assert url == f'https://api.energidataservice.dk/dataset/{dataset}?offset=100'
 
@@ -108,8 +96,6 @@ class TestEdsEndpointBuilder:
 
         # Act
         url = builder.build()
-
-        print(url)
 
         # Assert
         assert url == f'https://api.energidataservice.dk/dataset/{dataset}?timezone=dk'
@@ -123,8 +109,6 @@ class TestEdsEndpointBuilder:
         # Act
         url = builder.build()
 
-        print(url)
-
         # Assert
         assert url == f'https://api.energidataservice.dk/dataset/{dataset}?sort=HourUTC ASC'
 
@@ -136,8 +120,6 @@ class TestEdsEndpointBuilder:
 
         # Act
         url = builder.build()
-
-        print(url)
 
         # Assert
         assert url == f'https://api.energidataservice.dk/dataset/{dataset}?sort=HourUTC DESC'

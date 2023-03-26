@@ -34,7 +34,7 @@ class Schedule:
     def get_total_price(self, price_function: SpotPriceFunction) -> float:
         total_price = 0.0
         for task in self.tasks:
-            total_price += task.get_total_price(price_function)
+            total_price += task.get_max_total_price(price_function)
         return total_price
 
     def can_schedule_task_at(self, task: Task, start_time: datetime) -> bool:

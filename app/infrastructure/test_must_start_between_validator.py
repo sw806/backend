@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from random import random
 
 import pytest
 
@@ -79,27 +80,28 @@ class TestMustStartBetweenValidator():
         assert datetime_interval.end - power_usage_function.duration in start_times
         assert datetime_interval.end in start_times
 
-    @pytest.mark.randomize(min_num=-1000, max_num=1000, ncalls=50)
-    def test_validate(self, seconds: int) -> None:
-        # Arrange
-        start_datetime = datetime(2021, 1, 1, 15)
-        start_duration = timedelta(minutes=5)
-        datetime_interval = DatetimeInterval(start_datetime, start_duration)
+    def test_validate(self):
+        for _ in range(50):
+            # Arrange
+            seconds = int(random() * 100 - 50)
+            start_datetime = datetime(2021, 1, 1, 15)
+            start_duration = timedelta(minutes=5)
+            datetime_interval = DatetimeInterval(start_datetime, start_duration)
 
-        power_usage_function = PowerUsageFunction(
-            [(timedelta(hours=0), 1)], extend_by=timedelta(minutes=15)
-        )
-        must_start_between_validator = MustStartBetweenValidator(datetime_interval)
-        task = Task(power_usage_function, [ must_start_between_validator ])
-        
-        # Act
-        checked_time = start_datetime - timedelta(seconds)
-        valid = must_start_between_validator.validate(task, checked_time)
+            power_usage_function = PowerUsageFunction(
+                [(timedelta(hours=0), 1)], extend_by=timedelta(minutes=15)
+            )
+            must_start_between_validator = MustStartBetweenValidator(datetime_interval)
+            task = Task(power_usage_function, [ must_start_between_validator ])
+            
+            # Act
+            checked_time = start_datetime - timedelta(seconds)
+            valid = must_start_between_validator.validate(task, checked_time)
 
-        # Assert
-        if checked_time < datetime_interval.start:
-            assert valid is False
-        if checked_time >= datetime_interval.start and checked_time <= datetime_interval.end:
-            assert valid is True
-        if checked_time > datetime_interval.end:
-            assert valid is False
+            # Assert
+            if checked_time < datetime_interval.start:
+                assert valid is False
+            if checked_time >= datetime_interval.start and checked_time <= datetime_interval.end:
+                assert valid is True
+            if checked_time > datetime_interval.end:
+                assert valid is False

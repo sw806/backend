@@ -13,7 +13,7 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
     def power_consumption_at(self, tasks: List[ScheduledTask], time: datetime) -> float:
         power_consumption = 0.0
         for scheduled_task in tasks:
-            power_consumption += scheduled_task.get_power_consumption_at(time)
+            power_consumption += scheduled_task.get_max_power_consumption_at(time)
         return power_consumption
 
     def next_power_consumption_from(self, tasks: List[ScheduledTask], time: datetime) -> Optional[datetime]:

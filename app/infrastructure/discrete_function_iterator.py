@@ -24,14 +24,13 @@ class DiscreteFunctionIterator(Iterator, Generic[TDomain, TCodomain, TIntegral, 
 
         if len(functions) > 0:
             for function in functions[1:]:
-                if not start is None:
-                    min_domain = function.min_domain
-                    if function.domain_order(min_domain, start) < 0:
-                        start = min_domain
-                    
-                    max_domain = function.max_domain
-                    if function.domain_order(max_domain, end) > 0:
-                        end = max_domain
+                min_domain = function.min_domain
+                if function.domain_order(min_domain, start) < 0:
+                    start = min_domain
+                
+                max_domain = function.max_domain
+                if function.domain_order(max_domain, end) > 0:
+                    end = max_domain
 
         self.current = start
         self.start = start
@@ -40,6 +39,7 @@ class DiscreteFunctionIterator(Iterator, Generic[TDomain, TCodomain, TIntegral, 
 
     def get_next_from(self, argument: Optional[TDomain]) -> Optional[TDomain]:
         if argument is None: return None
+        if argument == self.end: return None
 
         smallest_domain: Optional[TDomain] = None
         for function in self.functions:
@@ -57,11 +57,15 @@ class DiscreteFunctionIterator(Iterator, Generic[TDomain, TCodomain, TIntegral, 
             if smallest_domain is None or \
                 function.domain_order(next_domain, smallest_domain) < 0:
                 smallest_domain = next_domain
+        
+        if smallest_domain is None:
+            smallest_domain = self.end
+
         return smallest_domain
 
     def __next__(self) -> Optional[TDomain]:
         temp = self.current
-        self.current = self.get_next_from(self.current)
         if temp is None:
             raise StopIteration
+        self.current = self.get_next_from(self.current)
         return temp
