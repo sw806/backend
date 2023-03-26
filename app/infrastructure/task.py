@@ -50,12 +50,6 @@ class Task:
         start_times: List[datetime] = []
 
         for runtime in DiscreteFunctionIterator([ self.power_usage_function ]):
-            # If it starts at the "start_time".
-            late_start = start_time - self.duration + runtime
-            if not late_start in start_times and\
-                self.is_scheduleable_at(late_start):
-                start_times.append(late_start)
-
             # If it ends at the "start_time".
             early_start = start_time - runtime
             if not early_start in start_times and\

@@ -190,10 +190,9 @@ class TestScheduler:
         start_points = scheduler.get_all_possible_start_times(task, schedule)
 
         # Assert
-        assert len(start_points) == 6
+        assert len(start_points) == 5
         assert datetime(2021, 1, 1, 15) in start_points
         assert datetime(2021, 1, 1, 15, 45) in start_points
-        assert datetime(2021, 1, 1, 15, 50) in start_points
         assert datetime(2021, 1, 1, 15, 55) in start_points
         assert datetime(2021, 1, 1, 16) in start_points
         assert datetime(2021, 1, 1, 16, 45) in start_points
@@ -222,13 +221,12 @@ class TestScheduler:
 
         # Assert
         print(start_points)
-        assert len(start_points) == 11
+        assert len(start_points) == 10
         assert datetime(2021, 1, 1, 15) in start_points
         assert datetime(2021, 1, 1, 15, 5) in start_points
         assert datetime(2021, 1, 1, 15, 10) in start_points
         assert datetime(2021, 1, 1, 15, 15) in start_points
         assert datetime(2021, 1, 1, 15, 30) in start_points
-        assert datetime(2021, 1, 1, 15, 35) in start_points
         assert datetime(2021, 1, 1, 15, 40) in start_points
         assert datetime(2021, 1, 1, 15, 45) in start_points
         assert datetime(2021, 1, 1, 15, 50) in start_points

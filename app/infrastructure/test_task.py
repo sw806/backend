@@ -86,6 +86,32 @@ class TestTask():
         assert len(datetimes) == 1
         assert start_time in datetimes
 
+    def test_derieve_start_times_must_have_all_starts_and_stops(self):
+        # Arrange
+        start_time = datetime(2021, 1, 1, 15)
+        power_function = PowerUsageFunction([
+            # Include start: 15
+            # Include end:   14:30
+            (timedelta(), 1),
+            # Include start: 14:30
+            # Include end:   14:00
+            (timedelta(minutes=30), 2),
+            # Include start: 14:00
+            # Include end:   13:00
+            (timedelta(hours=1), 3),
+        ], timedelta(hours=1))
+        task = Task(power_function)
+
+        # Act
+        datetimes = task.derieve_start_times(start_time)
+
+        # Assert
+        assert len(datetimes) == 4
+        assert datetime(2021, 1, 1, 15) in datetimes
+        assert datetime(2021, 1, 1, 14, 30) in datetimes
+        assert datetime(2021, 1, 1, 14) in datetimes
+        assert datetime(2021, 1, 1, 13) in datetimes
+
     def test_is_scheduleable_at_defaults_to_true(self):
         # Arrange
         start_time = datetime(2021, 1, 1, 15)
