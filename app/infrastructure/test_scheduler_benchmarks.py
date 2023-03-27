@@ -8,7 +8,6 @@ from infrastructure.must_start_between_validator import MustStartBetweenValidato
 from infrastructure.datetime_interval import DatetimeInterval
 from infrastructure.schedule import Schedule
 from infrastructure.schedule_task import ScheduledTask
-from infrastructure.scheduler import Scheduler
 from infrastructure.task import Task
 from infrastructure.power_usage_function import PowerUsageFunction
 from infrastructure.eletricity_prices import PricePoint

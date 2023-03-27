@@ -15,6 +15,7 @@ run:
 	cd ./app/; python3 .
 
 lint:
+	python3 -m pip install types-psycopg2
 	cd ./app/; mypy . --disallow-subclassing-any --disallow-untyped-calls --disallow-incomplete-defs --check-untyped-defs --no-implicit-optional --warn-redundant-casts --strict-equality
 
 fmt:
