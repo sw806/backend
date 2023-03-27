@@ -2,7 +2,7 @@ ci: req fmt lint test db
 
 all: req fmt test dc
 
-db:
+db: FORCE
 	docker compose build --build-arg COMMIT_HASH=$(shell git rev-parse HEAD)
 
 dc: db
@@ -24,3 +24,5 @@ fmt:
 test:
 	pytest
 	./scripts/dc-sanity-check.sh
+
+FORCE: ;

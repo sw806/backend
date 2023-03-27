@@ -1,4 +1,5 @@
 import os
+import psycopg2
 from typing import Optional
 
 class CheckStatusRequest:
@@ -6,8 +7,9 @@ class CheckStatusRequest:
         pass
 
 class CheckStatusResponse:
-    def __init__(self, is_healthy: bool, commit_hash: Optional[str] = None) -> None:
+    def __init__(self, is_healthy: bool, is_connected_to_db: bool, commit_hash: Optional[str] = None) -> None:
         self.is_healthy = is_healthy
+        self.is_connected_to_db = is_connected_to_db
         if not commit_hash is None:
             self.commit_hash = commit_hash
         else: self.commit_hash = "Unknown"
@@ -17,7 +19,17 @@ class CheckStatusUseCase:
         pass
 
     def do(self, _: CheckStatusRequest) -> CheckStatusResponse:
+        connection = psycopg2.connect(
+            host="db",
+            port=5432,
+            user="postgres",
+            password="postgres",
+            database="price-info"
+        )
+        could_connect_to_db = connection.closed == 0
+        connection.close()
         return CheckStatusResponse(
             True,
+            could_connect_to_db,
             os.environ["COMMIT_HASH"]
         )

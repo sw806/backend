@@ -8,7 +8,7 @@ from datetime import datetime
 class PostgresDatabase:
     def __init__(self) -> None:
         self.conn = psycopg2.connect(
-            host="localhost",
+            host="db",
             port=5432,
             user="postgres",
             password="postgres",
