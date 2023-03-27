@@ -22,7 +22,8 @@ class ScheduleTaskUseCase:
         pass
 
     def do(self, request: ScheduleTaskRequest) -> ScheduleTaskResponse:
-        price_points = GetSpotPricesUseCase().do(GetSpotPricesRequest(datetime.now())).price_points
+        getSpotPricesUseCase = GetSpotPricesUseCase()
+        price_points = getSpotPricesUseCase.do(GetSpotPricesRequest(datetime.now())).price_points
         optimal_time_calculator = OptimalTimeCalculator()
         optimal_time = optimal_time_calculator.calculate_optimal_time(price_points, timedelta(seconds=request.duration))
         return ScheduleTaskResponse(optimal_time)
