@@ -22,5 +22,5 @@ fmt:
 	python3 -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 test:
-	pytest --cov=app
+	pytest
 	./scripts/dc-sanity-check.sh
