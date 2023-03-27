@@ -20,7 +20,7 @@ class PostgresDatabase:
         query = f"SELECT * FROM pricepoint WHERE _time >= '{start_time.isoformat()}' ORDER BY _time DESC"
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
-        return [PricePoint(datetime.fromisoformat(str(row[1])), row[2]) for row in rows]
+        return [PricePoint(datetime.fromisoformat(str(row[1])), float(row[2])) for row in rows]
 
     def insert_prices(self, price_points: List[PricePoint]) -> None:
         query = "INSERT INTO pricepoint (_time, _price) VALUES %s"
