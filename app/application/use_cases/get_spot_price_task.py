@@ -1,4 +1,5 @@
 from typing import List
+from application.use_cases.use_Case import UseCase
 from infrastructure.eds_requests import EdsRequests
 from infrastructure.eds_requests import PricePoint
 import psycopg2
@@ -38,7 +39,7 @@ class GetSpotPricesResponse:
     def __init__(self, price_points: List[PricePoint]):
         self.price_points = price_points
 
-class GetSpotPricesUseCase:
+class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse]):
     def __init__(self) -> None:
         self.db = PostgresDatabase()
 
