@@ -21,7 +21,6 @@ class TaskValidator(ABC):
     def validate(self, task: Task, start_time: datetime) -> bool:
         pass
 
-
 class Task:
     def __init__(
         self,
