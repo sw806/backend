@@ -7,7 +7,7 @@ from psycopg2 import extras
 from datetime import datetime
 
 class PostgresDatabase:
-    def __init__(self, host = "db") -> None:
+    def __init__(self, host: str = "db") -> None:
         self.conn = psycopg2.connect(
             host=host,
             port=5432,
