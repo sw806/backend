@@ -2,8 +2,10 @@ from datetime import datetime
 import psycopg2 as psycopg2
 import os
 
+
 from infrastructure.eletricity_prices import PricePoint
 from application.use_cases.get_spot_price_task import PostgresDatabase
+
 
 class TestPostgresDatabase:
     def test_insert_prices(self):
@@ -11,14 +13,13 @@ class TestPostgresDatabase:
         price_points = [PricePoint(datetime(2022, 1, 1), 100.0), PricePoint(datetime(2022, 1, 2), 101.0)]
         db.insert_prices(price_points)
         db.cursor.execute("SELECT COUNT(*) FROM pricepoint")
-        one = db.cursor.fetchone()
-        if one is None:
+        pre_result = db.cursor.fetchone()
+        if pre_result is None:
             assert False
-        result = one[0]
+        result = pre_result[0]
         db.cursor.execute("TRUNCATE TABLE pricepoint")
         db.conn.commit()
         assert result == 2
-
 
     # def test_get_prices(self):
     #     db = PostgresDatabase()
