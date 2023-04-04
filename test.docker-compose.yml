@@ -3,3 +3,6 @@ version: "3.8"
 services:
   backend:
     command: "pytest"
+    ports:
+  db:
+    ports:
