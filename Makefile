@@ -22,7 +22,9 @@ fmt:
 	python3 -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 test:
+	docker compose up -d
 	pytest
+	docker compose down
 	./scripts/dc-sanity-check.sh
 
 FORCE: ;
