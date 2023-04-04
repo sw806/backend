@@ -15,6 +15,10 @@ services:
         - COMMIT_HASH
     networks:
       - network
+    ports:
+      - 8000:8000
+    restart:
+      on-failure
     depends_on:
       db:
         condition: service_healthy

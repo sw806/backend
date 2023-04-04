@@ -12,8 +12,7 @@ ENV COMMIT_HASH=$COMMIT_HASH
 RUN echo "$COMMIT_HASH"
 
 COPY /app/ /app/
-WORKDIR /app/
 
 EXPOSE 8000
 
-CMD ["python"]
+CMD ["python", "./app/"]
