@@ -15,16 +15,12 @@ services:
         - COMMIT_HASH
     networks:
       - network
-    ports:
-      - 8000:8000
     depends_on:
       - db
   db:
     image: postgres:15-alpine
     networks:
       - network
-    ports:
-      - 5433:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
