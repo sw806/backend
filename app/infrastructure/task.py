@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 from datetime import datetime, timedelta
 
 from infrastructure.discrete_function_iterator import DiscreteFunctionIterator
@@ -25,10 +25,10 @@ class Task:
     def __init__(
         self,
         power_usage_function: PowerUsageFunction,
-        validators: List[TaskValidator] = []
+        validator: Optional[TaskValidator] = None
     ) -> None:
         self.power_usage_function = power_usage_function
-        self.validators = validators
+        self.validator = validator
 
     @property
     def duration(self) -> timedelta:
@@ -36,10 +36,12 @@ class Task:
     
     def start_times(self) -> List[datetime]:
         times: List[datetime] = []
-        for validator in self.validators:
-            for start_time in validator.start_times(self):
-                if self.is_scheduleable_at(start_time):
-                    times.append(start_time)
+        if self.validator is None:
+            return times
+
+        for start_time in self.validator.start_times(self):
+            if self.is_scheduleable_at(start_time):
+                times.append(start_time)
         return times
 
     def derieve_start_times(self, start_time: datetime) -> List[datetime]:
@@ -58,7 +60,9 @@ class Task:
         return start_times
 
     def is_scheduleable_at(self, start_time: datetime) -> bool:
-        for validator in self.validators:
-            if not validator.validate(self, start_time):
-                return False
+        if self.validator is None:
+            return True
+        
+        if not self.validator.validate(self, start_time):
+            return False
         return True

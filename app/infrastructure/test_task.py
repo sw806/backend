@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from infrastructure.task_validator_conjunction import TaskValidatorConjunction
 from infrastructure.datetime_interval import DatetimeInterval
 from infrastructure.must_start_between_validator import MustStartBetweenValidator
 from infrastructure.power_usage_function import PowerUsageFunction
@@ -27,7 +28,7 @@ class TestTask():
         power_function = PowerUsageFunction([
             (timedelta(), 1.2),
         ], timedelta(hours=1))
-        task = Task(power_function, [must_start_between_validator])
+        task = Task(power_function, must_start_between_validator)
 
         # Act
         datetimes = task.start_times()
@@ -45,7 +46,12 @@ class TestTask():
         power_function = PowerUsageFunction([
             (timedelta(), 1.2),
         ], timedelta(hours=1))
-        task = Task(power_function, [must_start_between_validator_1, must_start_between_validator_2])
+        task = Task(
+            power_function,
+            TaskValidatorConjunction([
+                must_start_between_validator_1, must_start_between_validator_2
+            ])
+        )
 
         # Act
         datetimes = task.start_times()
@@ -77,7 +83,7 @@ class TestTask():
         power_function = PowerUsageFunction([
             (timedelta(), 1.2),
         ], timedelta(hours=1))
-        task = Task(power_function, [must_start_between_validator])
+        task = Task(power_function, must_start_between_validator)
 
         # Act
         datetimes = task.derieve_start_times(start_time)
