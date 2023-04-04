@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import List
+
 import psycopg2 as psycopg2
 import os
 
@@ -61,7 +63,7 @@ class TestPostgresDatabase:
         db = PostgresDatabase()
 
         # Act
-        price_points = []
+        price_points: List[PricePoint] = []
         db.insert_prices(price_points)
         db.cursor.execute("SELECT COUNT(*) FROM pricepoint")
         pre_result = db.cursor.fetchone()
