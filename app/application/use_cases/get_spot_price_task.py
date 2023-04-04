@@ -1,4 +1,3 @@
-from time import sleep
 from typing import List
 from application.use_cases.use_Case import UseCase
 from infrastructure.eds_requests import EdsRequests

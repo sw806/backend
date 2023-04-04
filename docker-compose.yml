@@ -16,7 +16,8 @@ services:
     networks:
       - network
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
     image: postgres:15-alpine
     networks:
@@ -30,3 +31,8 @@ services:
     volumes:
       - dbb:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
