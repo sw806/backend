@@ -313,7 +313,7 @@ class TestScheduler:
         )
         task = Task(power_usage_function)
 
-        schedule = Schedule([])
+        schedule = Schedule()
 
         # Act
         schedules = scheduler.schedule_task_for(task, schedule)
