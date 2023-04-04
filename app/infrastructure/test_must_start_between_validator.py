@@ -17,7 +17,7 @@ class TestMustStartBetweenValidator():
         power_usage_function = PowerUsageFunction(
             [(timedelta(hours=0), 1)], extend_by=timedelta(minutes=30)
         )
-        task = Task(power_usage_function, [ must_start_between_validator ])
+        task = Task(power_usage_function, must_start_between_validator)
         
         # Act
         start_times = must_start_between_validator.start_times(task)
@@ -33,7 +33,7 @@ class TestMustStartBetweenValidator():
         )
         datetime_interval = DatetimeInterval(datetime(2021, 1, 1, 15), power_usage_function.duration)
         must_start_between_validator = MustStartBetweenValidator(datetime_interval)
-        task = Task(power_usage_function, [ must_start_between_validator ])
+        task = Task(power_usage_function, must_start_between_validator)
         
         # Act
         start_times = must_start_between_validator.start_times(task)
@@ -50,7 +50,7 @@ class TestMustStartBetweenValidator():
         )
         datetime_interval = DatetimeInterval(datetime(2021, 1, 1, 15), power_usage_function.duration * 2)
         must_start_between_validator = MustStartBetweenValidator(datetime_interval)
-        task = Task(power_usage_function, [ must_start_between_validator ])
+        task = Task(power_usage_function, must_start_between_validator)
         
         # Act
         start_times = must_start_between_validator.start_times(task)
@@ -68,7 +68,7 @@ class TestMustStartBetweenValidator():
         )
         datetime_interval = DatetimeInterval(datetime(2021, 1, 1, 15), power_usage_function.duration * 3)
         must_start_between_validator = MustStartBetweenValidator(datetime_interval)
-        task = Task(power_usage_function, [ must_start_between_validator ])
+        task = Task(power_usage_function, must_start_between_validator)
         
         # Act
         start_times = must_start_between_validator.start_times(task)
@@ -92,7 +92,7 @@ class TestMustStartBetweenValidator():
                 [(timedelta(hours=0), 1)], extend_by=timedelta(minutes=15)
             )
             must_start_between_validator = MustStartBetweenValidator(datetime_interval)
-            task = Task(power_usage_function, [ must_start_between_validator ])
+            task = Task(power_usage_function, must_start_between_validator)
             
             # Act
             checked_time = start_datetime - timedelta(seconds)
