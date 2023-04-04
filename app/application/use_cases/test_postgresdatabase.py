@@ -9,7 +9,7 @@ from application.use_cases.get_spot_price_task import PostgresDatabase
 
 class TestPostgresDatabase:
     def test_insert_prices(self):
-        db = PostgresDatabase(host="db") # kommentar om det...
+        db = PostgresDatabase(host="backend-db-1") # kommentar om det...
         price_points = [PricePoint(datetime(2022, 1, 1), 100.0), PricePoint(datetime(2022, 1, 2), 101.0)]
         db.insert_prices(price_points)
         db.cursor.execute("SELECT COUNT(*) FROM pricepoint")
