@@ -9,7 +9,6 @@ from datetime import datetime
 
 class PostgresDatabase:
     def __init__(self, host: str = "db") -> None:
-        sleep(1000)
         self.conn = psycopg2.connect(
             host=host,
             port=5432,
