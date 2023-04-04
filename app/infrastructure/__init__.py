@@ -6,3 +6,7 @@ from .task_validator_conjunction import *
 from .task_validator_disjunction import *
 from .must_end_between_validator import *
 from .must_start_between_validator import *
+from .maximum_power_consumption_validator import *
+from .power_usage_function_factory import *
+from .scheduler import *
+from .spot_price_function import *
