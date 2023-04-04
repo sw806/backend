@@ -1,45 +1,32 @@
-from datetime import datetime, timedelta
-import sys
 from typing import List, Optional
 from pydantic.dataclasses import dataclass
 
-from infrastructure import (
-    TaskValidator, MustStartBetweenValidator
-)
-from infrastructure.datetime_interval import DatetimeInterval as ModelDatetimeInterval
 from application.use_cases.get_spot_price_task import GetSpotPricesRequest, GetSpotPricesResponse
 from application.use_cases.use_Case import UseCase
 
 @dataclass
 class DatetimeInterval:
     start: int
-    duration: int
+    duration: float
 
 @dataclass
 class MaximumPowerConsumption:
     maximum_consumption: float
 
 @dataclass
-class TaskInterval:
-    earliest_start: int
-    latest_start: Optional[int]
+class MustStartBetween:
+    start_interval: DatetimeInterval
 
-    @property
-    def validator(self) -> TaskValidator:
-        earliest_datetime = datetime.fromtimestamp(self.earliest_start)
-        duration = timedelta(seconds=sys.maxsize)
-        if not self.latest_start is None:
-            latest_datetime = datetime.fromtimestamp(self.latest_start)
-            duration = latest_datetime - earliest_datetime
-        return MustStartBetweenValidator(
-            ModelDatetimeInterval(earliest_datetime, duration)
-        )
+@dataclass
+class MustEndBetween:
+    end_interval: DatetimeInterval
 
 @dataclass
 class Task:
     duration: int
     power: float
-    must_start_between: List[TaskInterval]
+    must_start_between: Optional[MustStartBetween] = None
+    must_end_between: Optional[MustEndBetween] = None
 
 @dataclass
 class ScheduledTask:
