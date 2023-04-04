@@ -1,3 +1,4 @@
+from time import sleep
 from typing import List
 from application.use_cases.use_Case import UseCase
 from infrastructure.eds_requests import EdsRequests
@@ -8,12 +9,13 @@ from datetime import datetime
 
 class PostgresDatabase:
     def __init__(self, host: str = "db") -> None:
+        sleep(1000)
         self.conn = psycopg2.connect(
             host=host,
             port=5432,
             user="postgres",
             password="postgres",
-            database="price-info"
+            database="price-info",
         )
         self.cursor = self.conn.cursor()
 
