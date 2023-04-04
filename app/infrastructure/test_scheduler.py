@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import List
 
+from infrastructure.task_validator_conjunction import TaskValidatorConjunction
 from infrastructure.must_end_between_validator import MustEndBetweenValidator
 from infrastructure.must_start_between_validator import MustStartBetweenValidator
 from infrastructure.datetime_interval import DatetimeInterval
@@ -212,7 +213,7 @@ class TestScheduler:
         must_start_between_validator = MustStartBetweenValidator(
             DatetimeInterval(datetime(2021, 1, 1, 15), timedelta(hours=1))
         )
-        task = Task(power_usage_function, [must_start_between_validator])
+        task = Task(power_usage_function, must_start_between_validator)
 
         schedule = Schedule([])
 
@@ -253,7 +254,8 @@ class TestScheduler:
             DatetimeInterval(datetime(2021, 1, 1, 16, 10), timedelta(minutes=5))
         )
         task = Task(
-            power_usage_function, [must_start_between_validator, must_end_between_validator]
+            power_usage_function,
+            TaskValidatorConjunction([must_start_between_validator, must_end_between_validator])
         )
 
         schedule = Schedule([])
@@ -282,7 +284,7 @@ class TestScheduler:
             DatetimeInterval(datetime(2021, 1, 1, 15, 30), timedelta(minutes=15))
         )
         task = Task(
-            power_usage_function, [must_start_between_validator]
+            power_usage_function, must_start_between_validator
         )
 
         schedule = Schedule([])
@@ -311,7 +313,7 @@ class TestScheduler:
         )
         task = Task(power_usage_function)
 
-        schedule = Schedule([])
+        schedule = Schedule()
 
         # Act
         schedules = scheduler.schedule_task_for(task, schedule)

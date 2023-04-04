@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from infrastructure.schedule_task import ScheduledTask
 from infrastructure.spot_price_function import SpotPriceFunction
@@ -23,10 +23,10 @@ class Schedule:
     def __init__(
             self,
             tasks: List[ScheduledTask] = [],
-            validators: List[ScheduleValidator] = []
+            validator: Optional[ScheduleValidator] = None
         ) -> None:
         self.tasks = tasks
-        self.validators = validators
+        self.validator = validator
 
     def add(self, task: ScheduledTask) -> None:
         self.tasks.append(task)
@@ -38,12 +38,14 @@ class Schedule:
         return total_price
 
     def can_schedule_task_at(self, task: Task, start_time: datetime) -> bool:
+        if self.validator is None:
+            return True
+
         if not task.is_scheduleable_at(start_time):
             return False
 
-        for validator in self.validators:
-            if not validator.validate(self, task, start_time):
-                return False
+        if not self.validator.validate(self, task, start_time):
+            return False
             
         return True
 
