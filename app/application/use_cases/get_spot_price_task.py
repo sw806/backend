@@ -17,8 +17,12 @@ class PostgresDatabase:
         )
         self.cursor = self.conn.cursor()
 
-    def get_prices(self, start_time: datetime) -> List[PricePoint]:
-        query = f"SELECT * FROM pricepoint WHERE _time >= '{start_time.isoformat()}' ORDER BY _time DESC"
+    def get_prices(self, start_time: datetime, ascending: bool = False) -> List[PricePoint]:
+        query = f"SELECT * FROM pricepoint WHERE _time >= '{start_time.isoformat()}'"
+        if ascending:
+            query += " ORDER BY _time ASC"
+        else: query += " ORDER BY _time DESC"
+
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
         return [PricePoint(datetime.fromisoformat(str(row[1])), float(row[2])) for row in rows]
@@ -31,9 +35,11 @@ class PostgresDatabase:
 
 class GetSpotPricesRequest:
     start_time: datetime
+    ascending: bool
 
-    def __init__(self, start_time: datetime):
+    def __init__(self, start_time: datetime, ascending: bool = False):
         self.start_time = start_time
+        self.ascending = ascending
 
 class GetSpotPricesResponse:
     def __init__(self, price_points: List[PricePoint]):
@@ -44,7 +50,7 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
         self.db = PostgresDatabase()
 
     def do(self, request: GetSpotPricesRequest) -> GetSpotPricesResponse:
-        price_points = self.db.get_prices(request.start_time)
+        price_points = self.db.get_prices(request.start_time, request.ascending)
 
         if len(price_points) == 0 or (price_points[0].time.day <= request.start_time.day and datetime.now().hour > 15):
             price_points = EdsRequests().get_prices(request.start_time)

@@ -10,3 +10,5 @@ from .maximum_power_consumption_validator import *
 from .power_usage_function_factory import *
 from .scheduler import *
 from .spot_price_function import *
+from .lowest_price_recommender import *
+from .schedules_recommender import *

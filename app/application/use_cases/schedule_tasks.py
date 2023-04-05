@@ -15,7 +15,9 @@ from infrastructure import (
     ScheduledTask as ModelScheduledTask,
     Schedule as ModelSchedule,
     DatetimeInterval as ModelDatetimeInterval,
-    Scheduler, SpotPriceFunction
+    Scheduler, SpotPriceFunction,
+    LowestPriceRecommender,
+    TaskValidatorDisjunction, TaskValidatorConjunction
 )
 
 
@@ -34,7 +36,7 @@ class DatetimeInterval:
     @staticmethod
     def from_model(model: ModelDatetimeInterval) -> DatetimeInterval:
         return DatetimeInterval(
-            # FIXME: Does this pPOSIX conversion give any errors?
+            # FIXME: Does this POSIX conversion give any errors?
             start=int(model.start.timestamp()),
             duration=model.duration.seconds
         )
@@ -85,8 +87,8 @@ class MustEndBetween:
 class Task:
     duration: int
     power: float
-    must_start_between: List[MustStartBetween]
-    must_end_between: List[MustEndBetween]
+    must_start_between: Optional[List[MustStartBetween]]
+    must_end_between: Optional[List[MustEndBetween]]
 
     @property
     def to_model(self) -> ModelTask:
@@ -95,12 +97,25 @@ class Task:
             timedelta(minutes=self.duration), self.power
         )
 
-        # FIXME: This should get all possible permutations of the validators.
+        # TODO: This should use the factory pattern.
+        if self.must_start_between is None: self.must_start_between = []
+        if self.must_end_between is None: self.must_end_between = []
 
-        return ModelTask(
-            power_usage_function,
-            None
-        )
+        conjunctions = []
+        if len(self.must_start_between) > 0:
+            conjunctions.append(
+                TaskValidatorDisjunction([ validator.to_validator for validator in self.must_start_between ])
+            )
+
+        if len(self.must_end_between) > 0:
+            conjunctions.append(
+                [ validator.to_validator for validator in self.must_end_between ]
+            )
+
+        conjunction = None if len(conjunctions) is None else TaskValidatorConjunction(conjunctions)
+
+
+        return ModelTask(power_usage_function, conjunction)
 
     @staticmethod
     def from_model(model: ModelTask) -> Task:
@@ -182,16 +197,13 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
         self.get_spot_prices = get_spot_prices
 
     def do(self, request: ScheduleTasksRequest) -> ScheduleTasksResponse:
-        print(request)
-
         # Get all price points.
         price_response = self.get_spot_prices.do(
-            GetSpotPricesRequest(datetime.now())
+            GetSpotPricesRequest(datetime.now(), ascending=True)
         )
         price_points = price_response.price_points
-        print(price_points)
 
-        # Create spot price function
+        # Create spot price function.
         spot_price_function = SpotPriceFunction(price_points)
 
         # Create scheduler and base schedule.
@@ -205,10 +217,13 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
             request.task_models, base_schedule
         )
 
-        # TODO: Create recommendation engine to choose cheapest schedule.
+        # Get the recommendation.
+        # TODO: Recommender can be abstracted away as a dependecy on the abstract reommender class as a ctor parameter.
+        lowest_price_recommender = LowestPriceRecommender(spot_price_function)
+        recommendation = lowest_price_recommender.recommend(new_schedules)
         
-        # FIXME: Takes the first schedule and assumes it to be the cheapest.
+        # Construct the response.
         return ScheduleTasksResponse(
             tasks=[],
-            schedule=Schedule.from_model(new_schedules[0]),
+            schedule=Schedule.from_model(recommendation),
         )
