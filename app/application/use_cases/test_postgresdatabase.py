@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import List
-
 import psycopg2 as psycopg2
-import os
-
+from psycopg2.errors import UniqueViolation
+import pytest
 from infrastructure.eletricity_prices import PricePoint
 from application.use_cases.get_spot_price_task import PostgresDatabase
 
@@ -75,3 +74,35 @@ class TestPostgresDatabase:
 
         # Assert
         assert result == 0
+
+    def test_get_prices_empty_db(self):
+        # Arrange
+        db = PostgresDatabase()
+
+        # Act
+        start_time = datetime(2022, 1, 1)
+        result = db.get_prices(start_time)
+        db.cursor.execute("TRUNCATE TABLE pricepoint")
+        db.conn.commit()
+
+        # Assert
+        assert len(result) == 0
+
+    # def test_insert_prices_duplicate_entries(self):
+    #     # Arrange
+    #     db = PostgresDatabase(host="localhost")
+    #
+    #     # Act
+    #     price_points = [PricePoint(datetime(2022, 1, 1), 100.0), PricePoint(datetime(2022, 1, 1), 101.0)]
+    #     with pytest.raises(psycopg2.errors.UniqueViolation):
+    #         db.insert_prices(price_points)
+    #     db.cursor.execute("TRUNCATE TABLE pricepoint")
+    #     db.conn.commit()
+    #
+    #     # Assert
+    #     db.cursor.execute("SELECT COUNT(*) FROM pricepoint")
+    #     pre_result = db.cursor.fetchone()
+    #     if pre_result is None:
+    #         assert False
+    #     result = pre_result[0]
+    #     assert result == 0
