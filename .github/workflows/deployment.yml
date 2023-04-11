@@ -15,7 +15,7 @@ jobs:
         matrix:
             os: ["ubuntu-latest"]
     steps:
-      - name: SSH and update
+      - name: SSH and deploy changes
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: 130.225.39.82
@@ -23,4 +23,4 @@ jobs:
           key: ${{ secrets.STRATO_PEM }}
           script: |
             cd /srv/wattsdown/deployment
-            sudo make update
+            sudo make redeploy
