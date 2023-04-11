@@ -23,4 +23,4 @@ jobs:
           key: ${{ secrets.STRATO_PEM }}
           script: |
             cd /srv/wattsdown/deployment
-            make update
+            sudo make update
