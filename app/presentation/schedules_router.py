@@ -19,7 +19,8 @@ async def schedule_v2(request: ScheduleTasksRequest, response: Response) -> Any:
     try:
         print(request)
         scheduler_response = User().schedule_tasks(request)
-        if len(scheduler_response.schedule.tasks) == 0:
+        if scheduler_response.schedule is None or\
+            len(scheduler_response.schedule.tasks) == 0:
             response.status_code = 400
             return
         else:
