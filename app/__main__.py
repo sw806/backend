@@ -10,5 +10,5 @@ fastApi.include_router(schedules_router_v1)
 fastApi.include_router(schedules_router_v2)
 fastApi.include_router(status_router)
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     uvicorn.run(fastApi, host="0.0.0.0", port=80)
