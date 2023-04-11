@@ -13,6 +13,6 @@ RUN echo "$COMMIT_HASH"
 
 COPY /app/ /app/
 
-EXPOSE 8000
+EXPOSE 80
 
 CMD ["python", "./app/"]

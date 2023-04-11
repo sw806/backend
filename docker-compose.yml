@@ -16,7 +16,7 @@ services:
     networks:
       - network
     ports:
-      - 8000:8000
+      - 8000:80
     restart:
       on-failure
     depends_on:
