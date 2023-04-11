@@ -25,7 +25,7 @@ class PostgresDatabase:
 
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
-        return [PricePoint(datetime.fromisoformat(str(row[1])), float(row[2])) for row in rows]
+        return [PricePoint(datetime.fromisoformat(str(row[0])), float(row[1])) for row in rows]
 
     def insert_prices(self, price_points: List[PricePoint]) -> None:
         query = "INSERT INTO pricepoint (_time, _price) VALUES %s"
