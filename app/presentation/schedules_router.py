@@ -1,4 +1,5 @@
 from typing import Any
+from fastapi import Response
 from fastapi import APIRouter
 from application.use_cases.schedule_tasks import ScheduleTasksRequest
 from application import User, ScheduleTaskRequest
@@ -14,9 +15,16 @@ async def schedule_v1(request: ScheduleTaskRequest) -> Any:
         return "Error: " + str(e)
 
 @schedules_router_v2.post("/schedules")
-async def schedule_v2(request: ScheduleTasksRequest) -> Any:
+async def schedule_v2(request: ScheduleTasksRequest, response: Response) -> Any:
     try:
         print(request)
-        return User().schedule_tasks(request)
+        scheduler_response = User().schedule_tasks(request)
+        if scheduler_response.schedule is None or\
+            len(scheduler_response.schedule.tasks) == 0:
+            response.status_code = 400
+            return
+        else:
+            return User().schedule_tasks(request)
     except Exception as e:
+        response.status_code = 500
         return "Error: " + str(e)
