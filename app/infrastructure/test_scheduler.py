@@ -99,7 +99,7 @@ class TestScheduler:
         task = Task(power_usage_function)
 
         scheduled_task = ScheduledTask(
-            DatetimeInterval(datetime(2021, 1, 1, 16, 15), timedelta()), task
+            DatetimeInterval(datetime(2021, 1, 1, 16, 15), timedelta()), task, 0
         )
         schedule = Schedule([scheduled_task])
 
@@ -131,7 +131,7 @@ class TestScheduler:
         task = Task(power_usage_function)
 
         scheduled_task = ScheduledTask(
-            DatetimeInterval(datetime(2021, 1, 1, 16, 15), timedelta()), task
+            DatetimeInterval(datetime(2021, 1, 1, 16, 15), timedelta()), task, 0
         )
         schedule = Schedule([scheduled_task])
 
@@ -159,7 +159,7 @@ class TestScheduler:
         task = Task(power_usage_function)
 
         scheduled_task = ScheduledTask(
-            DatetimeInterval(datetime(2021, 1, 1, 16, 15), timedelta()), task
+            DatetimeInterval(datetime(2021, 1, 1, 16, 15), timedelta()), task, 0
         )
         schedule = Schedule([scheduled_task])
 
@@ -323,3 +323,29 @@ class TestScheduler:
         assert len(schedules) == 2
         assert schedules[0].get_total_price(spot_price_function) == 1
         assert schedules[1].get_total_price(spot_price_function) == 4
+
+#    def test_get_all_possible_extrapolated_start_times(self):
+#        # Arrange
+#        price_points: List[PricePoint] = [
+#            PricePoint(datetime(2021, 1, 1, 15), 1),
+#            PricePoint(datetime(2021, 1, 1, 16), 4),
+#        ]
+#        spot_price_function = SpotPriceFunction(price_points)
+#        scheduler = Scheduler(spot_price_function)
+#
+#        power_usage_function = PowerUsageFunction(
+#            [(timedelta(hours=0), 1)], extend_by=timedelta(hours=1)
+#        )
+#        task = Task(power_usage_function)
+#
+#        schedule = Schedule()
+#
+#        # Act
+#        intervals = scheduler.get_all_possible_extrapolated_start_times(
+#            task, schedule
+#        )
+#
+#        # Assert
+#        for interval in intervals:
+#            print(f'{interval.start} -({interval.duration})-> {interval.end}')
+#        assert False

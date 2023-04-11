@@ -12,3 +12,4 @@ from .scheduler import *
 from .spot_price_function import *
 from .lowest_price_recommender import *
 from .schedules_recommender import *
+from .task_validator_splitter import *

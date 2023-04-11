@@ -1,12 +1,15 @@
 from __future__ import annotations
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
+from infrastructure.eletricity_prices import PricePoint
 from infrastructure.datetime_interval import DatetimeInterval
 from infrastructure.schedule import Schedule
 from infrastructure.schedule_task import ScheduledTask
 from infrastructure.task import Task
 from infrastructure.spot_price_function import SpotPriceFunction
+from infrastructure.discrete_function_iterator import DiscreteFunctionIterator
+from infrastructure.power_price_function import PowerPriceFunction
 
 
 class Scheduler:
@@ -50,6 +53,42 @@ class Scheduler:
 
         return relevant_datetimes
 
+    def get_all_possible_extrapolated_start_times(
+        self,
+        task: Task,
+        schedule: Optional[Schedule] = None
+    ) -> List[DatetimeInterval]:
+        if schedule is None:
+            schedule = Schedule()
+
+        intervals: List[DatetimeInterval] = []
+        all_start_points = self.get_all_possible_start_times(task, schedule)
+
+        # Make sure that the times are sorted in ascending order.
+        all_start_points.sort(reverse=False)
+
+        if len(all_start_points) == 0:
+            return []
+
+        for start_time in all_start_points:
+            if not schedule.can_schedule_task_at(task, start_time):
+                continue
+
+            for end_time in all_start_points:
+                if end_time < start_time:
+                    continue
+
+                scheduleable = schedule.can_schedule_task_at(task, end_time)
+
+                if start_time is None and scheduleable:
+                    start_time = end_time
+
+                if start_time is not None and scheduleable:
+                    interval = DatetimeInterval(start_time, end_time - start_time)
+                    intervals.append(interval)
+
+        return intervals
+
     def schedule_task_for(
         self,
         task: Task,
@@ -64,9 +103,13 @@ class Scheduler:
             if not schedule.can_schedule_task_at(task, start_time):
                 continue
 
+            power_price_function = PowerPriceFunction(
+                task.power_usage_function, self.price_function
+            )
             scheduled_task = ScheduledTask(
                 DatetimeInterval(start_time, timedelta()), 
-                task
+                task,
+                power_price_function.integrate_from_to(start_time, task.duration)
             )
 
             # Create a copy of the schdule and add the new scheduled task to the copy.

@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 from infrastructure.discrete_function_iterator import DiscreteFunctionIterator
 from infrastructure.power_usage_function import PowerUsageFunction
+from infrastructure.datetime_interval import DatetimeInterval
 
 
 class TaskValidator(ABC):
@@ -51,12 +52,12 @@ class Task:
         start_times: List[datetime] = []
 
         for runtime in DiscreteFunctionIterator([ self.power_usage_function ]):
-            # If it ends at the "start_time".
+            # Calculate start times as if the task ended in the "start_time".
             early_start = start_time - runtime
             if not early_start in start_times and\
                 self.is_scheduleable_at(early_start):
                 start_times.append(early_start)
-                
+
         return start_times
 
     def is_scheduleable_at(self, start_time: datetime) -> bool:

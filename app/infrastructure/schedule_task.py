@@ -9,9 +9,10 @@ from infrastructure.task import Task
 
 
 class ScheduledTask:
-    def __init__(self, start_interval: DatetimeInterval, task: Task) -> None:
+    def __init__(self, start_interval: DatetimeInterval, task: Task, cost: float) -> None:
         self.start_interval = start_interval
         self.task = task
+        self.cost = cost
 
     @property
     def end_interval(self) -> DatetimeInterval:

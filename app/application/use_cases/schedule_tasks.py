@@ -17,7 +17,10 @@ from infrastructure import (
     DatetimeInterval as ModelDatetimeInterval,
     Scheduler, SpotPriceFunction,
     LowestPriceRecommender,
-    TaskValidatorDisjunction, TaskValidatorConjunction
+    TaskValidatorDisjunction, TaskValidatorConjunction,
+    TaskValidator,
+    TaskValidatorSplitter,
+    TaskValidatorSplit
 )
 
 
@@ -101,7 +104,7 @@ class Task:
         if self.must_start_between is None: self.must_start_between = []
         if self.must_end_between is None: self.must_end_between = []
 
-        conjunctions = []
+        conjunctions: List[TaskValidator] = []
         if len(self.must_start_between) > 0:
             conjunctions.append(
                 TaskValidatorDisjunction([ validator.to_validator for validator in self.must_start_between ])
@@ -109,7 +112,7 @@ class Task:
 
         if len(self.must_end_between) > 0:
             conjunctions.append(
-                [ validator.to_validator for validator in self.must_end_between ]
+                TaskValidatorDisjunction([ validator.to_validator for validator in self.must_end_between ])
             )
 
         conjunction = None if len(conjunctions) is None else TaskValidatorConjunction(conjunctions)
@@ -119,33 +122,42 @@ class Task:
 
     @staticmethod
     def from_model(model: ModelTask) -> Task:
+        split = TaskValidatorSplit()
+        if model.validator is not None:
+            splitter = TaskValidatorSplitter()
+            splitter.visit(model.validator)
+            split = splitter.split
+            must_start_between_validators = [MustStartBetween.from_validator(validator) for validator in split.must_start_between_validators]
+            must_end_between_validators = [MustEndBetween.from_validator(validator) for validator in split.must_end_between_validators]
+
         return Task(
             duration = int(model.duration.seconds / 60),
             # FIXME: Assumes constant power consumption as the value of the first point in the discrete function.
             power = model.power_usage_function.apply(
                 model.power_usage_function.min_domain
             ),
-            # FIXME: Correct set the must start/end between validators.
-            must_start_between = [],
-            must_end_between = [],
+            must_start_between = must_start_between_validators,
+            must_end_between = must_end_between_validators,
         )
 
 @dataclass
 class ScheduledTask:
     task: Task
     start_interval: DatetimeInterval
+    cost: float
 
     @property
     def to_model(self) -> ModelScheduledTask:
         return ModelScheduledTask(
-            self.start_interval.to_model, self.task.to_model
+            self.start_interval.to_model, self.task.to_model, self.cost
         )
 
     @staticmethod
     def from_model(model: ModelScheduledTask) -> ScheduledTask:
         return ScheduledTask(
             task = Task.from_model(model.task),
-            start_interval = DatetimeInterval.from_model(model.start_interval)
+            start_interval = DatetimeInterval.from_model(model.start_interval),
+            cost = model.cost
         )
 
 @dataclass

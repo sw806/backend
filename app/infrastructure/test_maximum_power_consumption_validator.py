@@ -19,7 +19,8 @@ class TestMaximumPowerConsumptionValidator:
         validator = MaximumPowerConsumptionValidator(3)
         task0 = ScheduledTask(
             DatetimeInterval(datetime(2021, 12, 19), timedelta()),
-            Task(power_function)
+            Task(power_function),
+            0
         )
 
         # Act
@@ -40,7 +41,8 @@ class TestMaximumPowerConsumptionValidator:
         validator = MaximumPowerConsumptionValidator(3)
         task0 = ScheduledTask(
             DatetimeInterval(datetime(2021, 12, 19), timedelta()),
-            Task(power_function)
+            Task(power_function),
+            0
         )
 
         # Act
@@ -60,7 +62,8 @@ class TestMaximumPowerConsumptionValidator:
         validator = MaximumPowerConsumptionValidator(3)
         task0 = ScheduledTask(
             DatetimeInterval(datetime(2021, 12, 19), timedelta()),
-            Task(power_function)
+            Task(power_function),
+            0
         )
 
         # Act
@@ -81,7 +84,8 @@ class TestMaximumPowerConsumptionValidator:
         validator = MaximumPowerConsumptionValidator(3)
         task0 = ScheduledTask(
             DatetimeInterval(datetime(2021, 12, 19), timedelta()),
-            Task(power_function)
+            Task(power_function),
+            0
         )
 
         # Act
@@ -101,7 +105,8 @@ class TestMaximumPowerConsumptionValidator:
         validator = MaximumPowerConsumptionValidator(3)
         task0 = ScheduledTask(
             DatetimeInterval(datetime(2021, 12, 19), timedelta()),
-            Task(power_function)
+            Task(power_function),
+            0
         )
 
         # Act
@@ -121,7 +126,8 @@ class TestMaximumPowerConsumptionValidator:
         validator = MaximumPowerConsumptionValidator(3)
         task0 = ScheduledTask(
             DatetimeInterval(datetime(2021, 12, 19), timedelta()),
-            Task(power_function)
+            Task(power_function),
+            0
         )
 
         # Act
@@ -140,11 +146,13 @@ class TestMaximumPowerConsumptionValidator:
         validator = MaximumPowerConsumptionValidator(3)
         task0 = ScheduledTask(
             DatetimeInterval(datetime(2021, 12, 19, 10), timedelta()),
-            Task(power_function)
+            Task(power_function),
+            0
         )
         task1 = ScheduledTask(
             DatetimeInterval(datetime(2021, 12, 19, 10), timedelta()),
-            Task(power_function)
+            Task(power_function),
+            0
         )
         schedule = Schedule([task0, task1])
         task = Task(power_function)
@@ -163,11 +171,13 @@ class TestMaximumPowerConsumptionValidator:
         validator = MaximumPowerConsumptionValidator(3)
         task0 = ScheduledTask(
             DatetimeInterval(datetime(2021, 12, 19, 10), timedelta()),
-            Task(power_function)
+            Task(power_function),
+            0
         )
         task1 = ScheduledTask(
             DatetimeInterval(datetime(2021, 12, 19, 10), timedelta()),
-            Task(power_function)
+            Task(power_function),
+            0
         )
         schedule = Schedule([task0, task1])
         task = Task(power_function)

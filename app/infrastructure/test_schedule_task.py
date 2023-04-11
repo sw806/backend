@@ -24,7 +24,7 @@ class TestScheduledTask():
 
             start_datetime = datetime(2021, 1, 1, 15) 
             start_interval = DatetimeInterval(start_datetime, start_duration)
-            scheduled_task = ScheduledTask(start_interval, task)
+            scheduled_task = ScheduledTask(start_interval, task, 0)
 
             expected = DatetimeInterval(
                 start_datetime + task_duration,
@@ -49,7 +49,7 @@ class TestScheduledTask():
 
             start_datetime = datetime(2021, 1, 1, 15) 
             start_interval = DatetimeInterval(start_datetime, start_duration)
-            scheduled_task = ScheduledTask(start_interval, task)
+            scheduled_task = ScheduledTask(start_interval, task, 0)
             checked_datetime = start_datetime + ((random() * 2 - 1) * 2) * (start_duration + task_duration)
 
             # Act
@@ -75,7 +75,7 @@ class TestScheduledTask():
         start_datetime = datetime(2021, 1, 1, 15)
         start_duration = timedelta()
         start_interval = DatetimeInterval(start_datetime, start_duration)
-        scheduled_task = ScheduledTask(start_interval, task)
+        scheduled_task = ScheduledTask(start_interval, task, 0)
 
         # Act
         datetimes = scheduled_task.derieve_start_times()
@@ -100,7 +100,7 @@ class TestScheduledTask():
         start_datetime = datetime(2021, 1, 1, 15)
         start_duration = timedelta(minutes=3)
         start_interval = DatetimeInterval(start_datetime, start_duration)
-        scheduled_task = ScheduledTask(start_interval, task)
+        scheduled_task = ScheduledTask(start_interval, task, 0)
 
         chosen_runtime = timedelta(minutes=random() * 3)
         chosen_datetime = start_datetime + chosen_runtime
@@ -130,7 +130,7 @@ class TestScheduledTask():
             start_datetime = datetime(2021, 1, 1, 15)
             start_duration = timedelta(minutes=random()*3)
             start_interval = DatetimeInterval(start_datetime, start_duration)
-            scheduled_task = ScheduledTask(start_interval, task)
+            scheduled_task = ScheduledTask(start_interval, task, 0)
 
             price_points: List[PricePoint] = [
                 PricePoint(start_datetime + runtime_step * 0, 1),
