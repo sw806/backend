@@ -88,21 +88,21 @@ class TestPostgresDatabase:
         # Assert
         assert len(result) == 0
 
-    # def test_insert_prices_duplicate_entries(self):
-    #     # Arrange
-    #     db = PostgresDatabase(host="localhost")
-    #
-    #     # Act
-    #     price_points = [PricePoint(datetime(2022, 1, 1), 100.0), PricePoint(datetime(2022, 1, 1), 101.0)]
-    #     with pytest.raises(psycopg2.errors.UniqueViolation):
-    #         db.insert_prices(price_points)
-    #     db.cursor.execute("TRUNCATE TABLE pricepoint")
-    #     db.conn.commit()
-    #
-    #     # Assert
-    #     db.cursor.execute("SELECT COUNT(*) FROM pricepoint")
-    #     pre_result = db.cursor.fetchone()
-    #     if pre_result is None:
-    #         assert False
-    #     result = pre_result[0]
-    #     assert result == 0
+    def test_insert_prices_duplicate_entries(self):
+        # Arrange
+        db = PostgresDatabase(host="localhost")
+
+        # Act
+        price_points = [PricePoint(datetime(2022, 1, 1), 100.0), PricePoint(datetime(2022, 1, 1), 101.0)]
+        with pytest.raises(psycopg2.errors.UniqueViolation):
+            db.insert_prices(price_points)
+        db.cursor.execute("TRUNCATE TABLE pricepoint")
+        db.conn.commit()
+
+        # Assert
+        db.cursor.execute("SELECT COUNT(*) FROM pricepoint")
+        pre_result = db.cursor.fetchone()
+        if pre_result is None:
+            assert False
+        result = pre_result[0]
+        assert result == 0
