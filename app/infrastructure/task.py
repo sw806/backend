@@ -26,8 +26,10 @@ class Task:
     def __init__(
         self,
         power_usage_function: PowerUsageFunction,
-        validator: Optional[TaskValidator] = None
+        validator: Optional[TaskValidator] = None,
+        id: Optional[str] = None
     ) -> None:
+        self.id = id
         self.power_usage_function = power_usage_function
         self.validator = validator
 

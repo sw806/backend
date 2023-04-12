@@ -18,7 +18,6 @@ class PostgresDatabase:
         self.cursor = self.conn.cursor()
 
     def get_prices(self, start_time: datetime, ascending: bool = False) -> List[PricePoint]:
-        print(f'get_prices start_time {start_time}')
         query = f"SELECT * FROM pricepoint WHERE _time >= '{start_time.isoformat()}'"
         if ascending:
             query += " ORDER BY _time ASC"
@@ -29,9 +28,6 @@ class PostgresDatabase:
         return [PricePoint(datetime.fromisoformat(str(row[0])), float(row[1])) for row in rows]
 
     def insert_prices(self, price_points: List[PricePoint]) -> None:
-        for price_point in price_points:
-            print(f'insert_prices price {price_point.time}, {price_point.price}')
-
         query = "INSERT INTO pricepoint (_time, _price) VALUES %s"
         values = [(price_point.time.isoformat(), price_point.price) for price_point in price_points]
         extras.execute_values(self.cursor, query, values)

@@ -88,6 +88,7 @@ class MustEndBetween:
 
 @dataclass
 class Task:
+    id: Optional[str] = None
     duration: int
     power: float
     must_start_between: Optional[List[MustStartBetween]]
@@ -118,7 +119,7 @@ class Task:
         conjunction = None if len(conjunctions) is None else TaskValidatorConjunction(conjunctions)
 
 
-        return ModelTask(power_usage_function, conjunction)
+        return ModelTask(power_usage_function, conjunction, self.id)
 
     @staticmethod
     def from_model(model: ModelTask) -> Task:
@@ -131,6 +132,7 @@ class Task:
             must_end_between_validators = [MustEndBetween.from_validator(validator) for validator in split.must_end_between_validators]
 
         return Task(
+            id = model.id,
             duration = int(model.duration.seconds / 60),
             # FIXME: Assumes constant power consumption as the value of the first point in the discrete function.
             power = model.power_usage_function.apply(
