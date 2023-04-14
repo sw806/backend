@@ -13,7 +13,7 @@ class EdsRequests(ElectricityPrices):
         # Builds URL for Eds "Elspotprices" dataset.
         builder = EdsUrlBuilder("Elspotprices") \
             .add_to_filter("PriceArea", "DK1") \
-            .set_sort_on_key("HourDK", True) \
+            .set_sort_on_key("HourDK", False) \
 
         if not start is None:
             builder.set_start(start)

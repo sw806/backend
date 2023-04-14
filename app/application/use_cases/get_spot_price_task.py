@@ -57,6 +57,9 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
             price_points = EdsRequests().get_prices(request.start_time)
             self.db.insert_prices(price_points)
 
+        for price in price_points:
+            print(price.time)
+
         return GetSpotPricesResponse(price_points)
 
 
