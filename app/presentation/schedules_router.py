@@ -13,14 +13,14 @@ schedules_router_v1 = APIRouter(prefix="/api/v1")
 schedules_router_v2 = APIRouter(prefix="/api/v2")
 
 @schedules_router_v1.post("/schedules")
-async def schedule_v1(request: ScheduleTaskRequest) -> ScheduleTaskResponse:
+async def schedule_v1(request: ScheduleTaskRequest) -> Any:
     try:
         return User().schedule_task(request)
     except Exception as e:
         return "Error: " + str(e)
 
 @schedules_router_v2.post("/schedules")
-async def schedule_v2(request: ScheduleTasksRequest, response: Response) -> ScheduleTasksResponse:
+async def schedule_v2(request: ScheduleTasksRequest, response: Response) -> Any:
     try:
         print(request)
         scheduler_response = User().schedule_tasks(request)
