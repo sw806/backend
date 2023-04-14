@@ -90,8 +90,8 @@ class MustEndBetween:
 class Task:
     duration: int
     power: float
-    must_start_between: Optional[List[MustStartBetween]]
-    must_end_between: Optional[List[MustEndBetween]]
+    must_start_between: Optional[List[MustStartBetween]] = None
+    must_end_between: Optional[List[MustEndBetween]] = None
     id: Optional[str] = None
 
     @property

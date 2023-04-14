@@ -12,6 +12,10 @@ class TaskValidatorSplit:
 class TaskValidatorSplitter(TaskValidatorVisitor[None]):
     split: TaskValidatorSplit
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.split = TaskValidatorSplit()
+
     def visit_conjunction(self, conjunction: TaskValidatorConjunction) -> None:
         for validator in conjunction.validators:
             return self.visit(validator)
