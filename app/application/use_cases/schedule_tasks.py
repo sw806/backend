@@ -88,11 +88,11 @@ class MustEndBetween:
 
 @dataclass
 class Task:
-    id: Optional[str] = None
     duration: int
     power: float
     must_start_between: Optional[List[MustStartBetween]]
     must_end_between: Optional[List[MustEndBetween]]
+    id: Optional[str] = None
 
     @property
     def to_model(self) -> ModelTask:
