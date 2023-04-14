@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 class PricePoint:
     def __init__(self, time: datetime, price: float) -> None:
         self.time = time
+        # Price is DKK per MWh to DKK per KWh
         self.price = price
 
     def to_dict(self) -> Dict[str, Any]:

@@ -47,7 +47,8 @@ class EdsRequests(ElectricityPrices):
                 raise ValueError("'HourDK' is not iso format", record) from exc
 
             try:
-                price: float = float(record['SpotPriceDKK'])
+                # Convert from DKK per MWh to DKK per KWh
+                price: float = float(record['SpotPriceDKK']) / 1000
             except KeyError as exc:
                 raise KeyError("Missing 'SpotPriceDKK' in price point record", record) from exc
             except ValueError as exc:

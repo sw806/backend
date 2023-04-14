@@ -46,7 +46,7 @@ class TestEdsRequests:
         price_points = eds.create_price_points_from_json(records)
 
         # Assert
-        assert all([float(records[i]["SpotPriceDKK"]) == price_points[i].price for i in range(len(records))])
+        assert all([float(records[i]["SpotPriceDKK"]) / 1000 == price_points[i].price for i in range(len(records))])
 
     def test_create_price_points_from_json_invalid_missing_hourdk(self):
         # Arrange
