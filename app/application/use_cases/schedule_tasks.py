@@ -232,12 +232,17 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
         )
 
         # Get the recommendation.
-        # TODO: Recommender can be abstracted away as a dependecy on the abstract reommender class as a ctor parameter.
-        lowest_price_recommender = LowestPriceRecommender(spot_price_function)
-        recommendation = lowest_price_recommender.recommend(new_schedules)
+        if len(new_schedules) == 0:
+            recommendation = None
+        else:
+            # TODO: Recommender can be abstracted away as a dependecy on the abstract reommender class as a ctor parameter.
+            lowest_price_recommender = LowestPriceRecommender(spot_price_function)
+            recommendation = Schedule.from_model(
+                lowest_price_recommender.recommend(new_schedules)
+            )
         
         # Construct the response.
         return ScheduleTasksResponse(
             tasks=[],
-            schedule=Schedule.from_model(recommendation),
+            schedule=recommendation,
         )
