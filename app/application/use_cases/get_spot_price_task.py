@@ -50,51 +50,10 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
         self.db = PostgresDatabase()
 
     def do(self, request: GetSpotPricesRequest) -> GetSpotPricesResponse:
-        print(f'GetSpotPricesUseCase: {request}')
         price_points = self.db.get_prices(request.start_time, request.ascending)
 
         if len(price_points) == 0 or (price_points[0].time.day <= request.start_time.day and datetime.now().hour > 15):
             price_points = EdsRequests().get_prices(request.start_time)
             self.db.insert_prices(price_points)
 
-        for price in price_points:
-            print(price.time)
-
         return GetSpotPricesResponse(price_points)
-
-
-
-
-# if __name__ == "__main__":
-#     result = GetSpotPricesUseCase().do(GetSpotPricesRequest(datetime.now()))
-#     for item in result.price_points:
-#         print(item.time, item.price)
-#
-#     print("Done")
-
-#
-# class GetSpotPricesUseCase:
-#     def __init__(self) -> None:
-#         pass
-#
-#     def do(self, request: GetSpotPricesRequest) -> GetSpotPricesResponse:
-#         file_path = path.join(path.dirname(__file__), "spot_prices.json")
-#
-#         if not path.isfile(file_path):
-#             price_points = EdsRequests().get_prices(request.start_time)
-#             with open(file_path, "w") as file:
-#                 dump([price_point.to_dict() for price_point in price_points], file)
-#         else:
-#             with open(file_path, "r") as file:
-#                 lines = load(file)
-#                 price_points = []
-#                 for line in lines:
-#                     price_points.append(PricePoint(datetime.fromisoformat(line["time"]), line["price"]))
-#                 if price_points[0].time.day <= request.start_time.day and datetime.now().hour > 15:
-#                     price_points = EdsRequests().get_prices(request.start_time)
-#                     with open(file_path, "w") as file:
-#                         dump(price_points, file)
-#
-#         return GetSpotPricesResponse(price_points)
-
-

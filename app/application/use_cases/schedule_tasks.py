@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from pydantic.dataclasses import dataclass
 
@@ -32,7 +32,7 @@ class DatetimeInterval:
     @property
     def to_model(self) -> ModelDatetimeInterval:
         return ModelDatetimeInterval(
-            datetime.fromtimestamp(self.start),
+            datetime.fromtimestamp(self.start, timezone.utc),
             timedelta(seconds=self.duration)
         )
     
@@ -98,7 +98,7 @@ class Task:
     def to_model(self) -> ModelTask:
         power_usage_factory = PowerUsageFunctionFactory()
         power_usage_function = power_usage_factory.create_constant_consumption(
-            timedelta(minutes=self.duration), self.power
+            timedelta(seconds=self.duration), self.power
         )
 
         # TODO: This should use the factory pattern.
@@ -133,7 +133,7 @@ class Task:
 
         return Task(
             id = model.id,
-            duration = int(model.duration.seconds / 60),
+            duration = model.duration.seconds,
             # FIXME: Assumes constant power consumption as the value of the first point in the discrete function.
             power = model.power_usage_function.apply(
                 model.power_usage_function.min_domain
