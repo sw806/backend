@@ -6,8 +6,8 @@ from .must_end_between_validator import MustEndBetweenValidator
 from .task_validator_visitor import TaskValidatorVisitor
 
 class TaskValidatorSplit:
-    must_start_between_validators: List[MustStartBetweenValidator]
-    must_end_between_validators: List[MustEndBetweenValidator]
+    must_start_between_validators: List[MustStartBetweenValidator] = []
+    must_end_between_validators: List[MustEndBetweenValidator] = []
 
 class TaskValidatorSplitter(TaskValidatorVisitor[None]):
     split: TaskValidatorSplit
