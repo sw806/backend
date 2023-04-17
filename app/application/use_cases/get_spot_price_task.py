@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List, Optional, Tuple
 from application.use_cases.use_Case import UseCase
 from infrastructure.eds_requests import EdsRequests
 from infrastructure.eds_requests import PricePoint
@@ -17,19 +17,6 @@ class PostgresDatabase:
         )
         self.cursor = self.conn.cursor()
 
-    def row_to_price_point(self, row: List[tuple]) -> PricePoint:
-        return PricePoint(
-            datetime.fromisoformat(str(row[0])),
-            float(row[1])
-        )
-
-    def price_points_count(self) -> int:
-        query = "SELECT COUNT(*) FROM pricepoint"
-        self.cursor.execute(query)
-        row = self.cursor.fetchone()
-        print(row)
-        return int(row[0])
-
     def get_prices(self, start_time: datetime, ascending: bool = False) -> List[PricePoint]:
         query = f"SELECT * FROM pricepoint WHERE _time >= '{start_time.isoformat()}'"
         if ascending:
@@ -38,13 +25,16 @@ class PostgresDatabase:
 
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
-        return [self.row_to_price_point(row) for row in rows]
+        return [PricePoint(datetime.fromisoformat(str(row[0])), float(row[1])) for row in rows]
 
-    def get_last_price_point(self) -> PricePoint:
+    def get_last_price_point(self) -> Optional[PricePoint]:
         query = "SELECT * FROM pricepoint ORDER BY _time DESC LIMIT 1"
         self.cursor.execute(query)
         row = self.cursor.fetchone()
-        return self.row_to_price_point(row)
+
+        if row is None:
+            return None
+        return PricePoint(datetime.fromisoformat(str(row[0])), float(row[1]))
 
     def insert_prices(self, price_points: List[PricePoint]) -> None:
         query = "INSERT INTO pricepoint (_time, _price) VALUES %s ON CONFLICT DO NOTHING"
@@ -72,7 +62,7 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
         price_points = self.db.get_prices(request.start_time, request.ascending)
         last_price_point = self.db.get_last_price_point()
 
-        if len(price_points) == 0 or (last_price_point.time.day <= request.start_time.day and datetime.now().hour > 15):
+        if last_price_point is None or (last_price_point.time.day <= request.start_time.day and datetime.now().hour > 13):
             price_points = EdsRequests().get_prices(request.start_time)
             self.db.insert_prices(price_points)
 
