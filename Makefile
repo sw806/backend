@@ -20,6 +20,8 @@ fmt:
 	python3 -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 test: db
+	docker compose down -v
 	docker compose -f docker-compose.yml -f test.docker-compose.yml up --exit-code-from backend
+	docker compose down -v
 
 FORCE: ;
