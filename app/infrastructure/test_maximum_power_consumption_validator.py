@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from infrastructure.must_end_between_validator import MustEndBetweenValidator
 from infrastructure.power_usage_function_factory import PowerUsageFunctionFactory
 from infrastructure.schedule import Schedule
 from infrastructure.datetime_interval import DatetimeInterval
@@ -191,7 +192,7 @@ class TestMaximumPowerConsumptionValidator:
 
     def test_maximum_power_consumption_validator_checks_times_after_task_start(self):
         # Arrange
-        
+
         # This should not be possible if both tasks uses 1Kw and max consumption is 1Kw.
         # "1" starts at 2021-01-01 17:00:00 and ends at 2021-01-01 18:00:00
         # "2" starts at 2021-01-01 16:00:00 and ends at 2021-01-01 17:15:00
@@ -218,3 +219,35 @@ class TestMaximumPowerConsumptionValidator:
 
         # Assert
         assert not valid
+
+    def test_maximum_power_consumption_end_right_before_next_starts(self):
+        # Arrange
+
+        # "1" starts at 2021-01-01 17:00:00 and ends at 2021-01-01 18:00:00
+        # "2" starts at 2021-01-01 15:45:00 and ends at 2021-01-01 17:00:00
+
+        power_function_1 = PowerUsageFunctionFactory().create_constant_consumption(timedelta(minutes=60), 1)
+        task_1 = Task(power_function_1, id="1")
+        scheduled_task_1 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 1, 1, 17), timedelta()),
+            task_1,
+            1
+        )
+
+
+        power_function_2 = PowerUsageFunctionFactory().create_constant_consumption(timedelta(minutes=75), 1)
+        must_end_between_2 = MustEndBetweenValidator(
+            DatetimeInterval(scheduled_task_1.start_interval.start, timedelta())
+        )
+        task_2 = Task(power_function_2, must_end_between_2, "2")
+
+        validator = MaximumPowerConsumptionValidator(1)
+        schedule = Schedule([scheduled_task_1], validator)
+
+        # Act
+        valid = schedule.can_schedule_task_at(
+            task_2, datetime(2021, 1, 1, 15, 45)
+        )
+
+        # Assert
+        assert valid

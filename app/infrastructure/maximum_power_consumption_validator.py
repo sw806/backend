@@ -48,11 +48,9 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
     def validate(self, schedule: Schedule, task: Task, start_time: datetime) -> bool:
         current_time = start_time
         while not current_time is None:
-            print(f'Current: {current_time}')
             # Calculate runtime for task to schedule and check if it exceeds the task's duration.
             runtime = current_time - start_time
-            if runtime > task.duration:
-                print("runtime > task.duration")
+            if runtime >= task.duration:
                 break
 
             # Get the task power consumption.
@@ -64,7 +62,6 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
             
             # Check if we exceed the limit.
             if total_consumption > self.maximum_consumption:
-                print("total_consumption > self.maximum_consumption")
                 return False
 
             # We did not exceed the power consumption limit so we proceed to the next point.
@@ -74,7 +71,6 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
 
             # Check if there was one if so then set current to be that.
             if next_time is None:
-                print("next_time is None")
                 break
             current_time = next_time
 

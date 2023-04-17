@@ -324,3 +324,48 @@ class TestScheduler:
         assert len(schedules) == 2
         assert schedules[0].get_total_price(spot_price_function) == 1
         assert schedules[1].get_total_price(spot_price_function) == 4
+
+    def test_end_constraint_and_max_consumption_start_and_end_same_time(self):
+        # Arrange
+
+        # "1" starts at 2021-01-01 17:00:00 and ends at 2021-01-01 18:00:00
+        # "2" starts at 2021-01-01 15:45:00 and ends at 2021-01-01 17:00:00
+
+        power_function_1 = PowerUsageFunctionFactory().create_constant_consumption(timedelta(minutes=60), 1)
+        task_1 = Task(power_function_1, id="1")
+        scheduled_task_1 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 1, 1, 17), timedelta()),
+            task_1,
+            1
+        )
+
+        power_function_2 = PowerUsageFunctionFactory().create_constant_consumption(timedelta(minutes=75), 1)
+        must_end_between_2 = MustEndBetweenValidator(
+            DatetimeInterval(scheduled_task_1.start_interval.start, timedelta())
+        )
+        task_2 = Task(power_function_2, must_end_between_2, "2")
+
+        validator = MaximumPowerConsumptionValidator(1)
+        schedule = Schedule([scheduled_task_1], validator)
+
+        price_points: List[PricePoint] = [
+            PricePoint(datetime(2021, 1, 1, 15), 1),
+            PricePoint(datetime(2021, 1, 1, 16), 1),
+            PricePoint(datetime(2021, 1, 1, 17), 1),
+            PricePoint(datetime(2021, 1, 1, 18), 1),
+        ]
+        scheduler = Scheduler(
+            SpotPriceFunction(price_points)
+        )
+
+        # Act
+        start_points = scheduler.get_all_possible_start_times(
+            task_2, schedule
+        )
+        valid = schedule.can_schedule_task_at(
+            task_2, datetime(2021, 1, 1, 15, 45)
+        )
+
+        # Assert
+        assert datetime(2021, 1, 1, 15, 45) in start_points
+        assert valid
