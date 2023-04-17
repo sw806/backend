@@ -28,68 +28,42 @@ MAX_CONSUMPTION_MIN_RANGE = 0.25
 MAX_CONSUMPTION_MAX_RANGE = 7.5
 
 
-def generate_json() -> str:
+def generate_json() -> str: # TODO add constant values
     data = {
+    "tasks": [
+        {
+            "id": "2",
+            "duration": 3600,
+            "power": 1,
+            "must_start_between": [],
+            "must_end_between": []
+        }
+    ],
+    "schedule": {
         "tasks": [
             {
-                "duration": random.randint(DURATION_MIN_RANGE, DURATION_MAX_RANGE),
-                "power": random.uniform(POWER_MIN_RANGE, POWER_MAX_RANGE),
-                "must_start_between": [
-                    {
-                        "start_interval": {
-                            "start": random.randint(START_INTERVAL_START_MIN_RANGE, START_INTERVAL_START_MAX_RANGE), # 15:00
-                            "duration": random.randint(START_INTERVAL_DURATION_MIN_RANGE, START_INTERVAL_DURATION_MAX_RANGE) # 00:30
-                        }
-                    }
-                ],
-                "must_end_between": [
-                    {
-                        "end_interval": {
-                            "start": random.randint(END_INTERVAL_START_MIN_RANGE, END_INTERVAL_START_MAX_RANGE), # 16:00
-                            "duration": random.randint(END_INTERVAL_DURATION_MIN_RANGE, END_INTERVAL_DURATION_MAX_RANGE) # 00:30
-                        }
-                    }
-                ],
-                "id": "string"
+                "task": {
+                    "duration": 3600,
+                    "power": 1.0,
+                    "must_start_between": [],
+                    "must_end_between": [],
+                    "id": "1"
+                },
+                "start_interval": {
+                    "start": 1681743600,
+                    "duration": 0
+                },
+                "cost": 0.691
             }
         ],
-        "schedule": {
-            "tasks": [
-                {
-                    "task": {
-                       "duration": random.randint(DURATION_MIN_RANGE, DURATION_MAX_RANGE),
-                        "power": random.uniform(POWER_MIN_RANGE, POWER_MAX_RANGE),
-                        "must_start_between": [
-                        {
-                        "start_interval": {
-                            "start": random.randint(START_INTERVAL_START_MIN_RANGE, START_INTERVAL_START_MAX_RANGE), # 15:00
-                            "duration": random.randint(START_INTERVAL_DURATION_MIN_RANGE, START_INTERVAL_DURATION_MAX_RANGE) # 00:30
-                        }
-                    }
-                ],
-                "must_end_between": [
-                    {
-                        "end_interval": {
-                            "start": random.randint(END_INTERVAL_START_MIN_RANGE, END_INTERVAL_START_MAX_RANGE), # 16:00
-                            "duration": random.randint(END_INTERVAL_DURATION_MIN_RANGE, END_INTERVAL_DURATION_MAX_RANGE) # 00:30
-                        }
-                    }
-                ],
-                "id": "string"
-            },
-                    "start_interval": {
-                        "start": random.randint(START_INTERVAL_START_MIN_RANGE, START_INTERVAL_START_MAX_RANGE), # 15:00
-                        "duration": random.randint(START_INTERVAL_DURATION_MIN_RANGE, START_INTERVAL_DURATION_MAX_RANGE)
-                    },
-                    "cost": random.randint(COST_MIN_RANGE, COST_MAX_RANGE)
-                }
-            ],
-            "maximum_power_consumption": {
-                "maximum_consumption": random.uniform(MAX_CONSUMPTION_MIN_RANGE, MAX_CONSUMPTION_MAX_RANGE)
-            }
+        "maximum_power_consumption": {
+            "maximum_consumption": 1
         }
     }
+}
+
     return json.dumps(data)
+
 
 if __name__ == "__main__":
     result = generate_json()
