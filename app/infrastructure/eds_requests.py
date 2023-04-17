@@ -1,6 +1,6 @@
 import requests
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from requests import Response
 from .eletricity_prices import ElectricityPrices, PricePoint
 from .eds_url_builder import EdsUrlBuilder
@@ -13,7 +13,7 @@ class EdsRequests(ElectricityPrices):
         # Builds URL for Eds "Elspotprices" dataset.
         builder = EdsUrlBuilder("Elspotprices") \
             .add_to_filter("PriceArea", "DK1") \
-            .set_sort_on_key("HourDK", False) \
+            .set_sort_on_key("HourUTC", False) \
 
         if not start is None:
             builder.set_start(start)
@@ -40,11 +40,12 @@ class EdsRequests(ElectricityPrices):
         price_points: List[PricePoint] = []
         for record in json:
             try:
-                time: datetime = datetime.fromisoformat(record['HourDK'])
+                time: datetime = datetime.fromisoformat(record['HourUTC']) \
+                    .astimezone(timezone.utc)
             except KeyError as exc:
-                raise KeyError("Missing 'HourDK' in price point record", record) from exc
+                raise KeyError("Missing 'HourUTC' in price point record", record) from exc
             except ValueError as exc:
-                raise ValueError("'HourDK' is not iso format", record) from exc
+                raise ValueError("'HourUTC' is not iso format", record) from exc
 
             try:
                 # Convert from DKK per MWh to DKK per KWh
