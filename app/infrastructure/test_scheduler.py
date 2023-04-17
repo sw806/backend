@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from typing import List
 
+from infrastructure.maximum_power_consumption_validator import MaximumPowerConsumptionValidator
+from infrastructure.power_usage_function_factory import PowerUsageFunctionFactory
 from infrastructure.task_validator_conjunction import TaskValidatorConjunction
 from infrastructure.must_end_between_validator import MustEndBetweenValidator
 from infrastructure.must_start_between_validator import MustStartBetweenValidator
@@ -221,7 +223,6 @@ class TestScheduler:
         start_points = scheduler.get_all_possible_start_times(task, schedule)
 
         # Assert
-        print(start_points)
         assert len(start_points) == 10
         assert datetime(2021, 1, 1, 15) in start_points
         assert datetime(2021, 1, 1, 15, 5) in start_points
@@ -298,7 +299,7 @@ class TestScheduler:
         assert datetime(2021, 1, 1, 15, 30) in start_points
         assert datetime(2021, 1, 1, 15, 35) in start_points
         assert datetime(2021, 1, 1, 15, 45) in start_points
-    
+
     def test_schedule_task_for_one_full_hour_none_scheduled(self):
         # Arrange
         price_points: List[PricePoint] = [
@@ -323,29 +324,3 @@ class TestScheduler:
         assert len(schedules) == 2
         assert schedules[0].get_total_price(spot_price_function) == 1
         assert schedules[1].get_total_price(spot_price_function) == 4
-
-#    def test_get_all_possible_extrapolated_start_times(self):
-#        # Arrange
-#        price_points: List[PricePoint] = [
-#            PricePoint(datetime(2021, 1, 1, 15), 1),
-#            PricePoint(datetime(2021, 1, 1, 16), 4),
-#        ]
-#        spot_price_function = SpotPriceFunction(price_points)
-#        scheduler = Scheduler(spot_price_function)
-#
-#        power_usage_function = PowerUsageFunction(
-#            [(timedelta(hours=0), 1)], extend_by=timedelta(hours=1)
-#        )
-#        task = Task(power_usage_function)
-#
-#        schedule = Schedule()
-#
-#        # Act
-#        intervals = scheduler.get_all_possible_extrapolated_start_times(
-#            task, schedule
-#        )
-#
-#        # Assert
-#        for interval in intervals:
-#            print(f'{interval.start} -({interval.duration})-> {interval.end}')
-#        assert False

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from infrastructure.power_usage_function_factory import PowerUsageFunctionFactory
 from infrastructure.schedule import Schedule
 from infrastructure.datetime_interval import DatetimeInterval
 from infrastructure.maximum_power_consumption_validator import MaximumPowerConsumptionValidator
@@ -187,3 +188,33 @@ class TestMaximumPowerConsumptionValidator:
 
         # Assert
         assert actual == True
+
+    def test_maximum_power_consumption_validator_checks_times_after_task_start(self):
+        # Arrange
+        
+        # This should not be possible if both tasks uses 1Kw and max consumption is 1Kw.
+        # "1" starts at 2021-01-01 17:00:00 and ends at 2021-01-01 18:00:00
+        # "2" starts at 2021-01-01 16:00:00 and ends at 2021-01-01 17:15:00
+
+        power_function_1 = PowerUsageFunctionFactory().create_constant_consumption(timedelta(minutes=60), 1)
+        task_1 = Task(power_function_1, id="1")
+        scheduled_task_1 = ScheduledTask(
+            DatetimeInterval(datetime(2021, 1, 1, 17), timedelta()),
+            task_1,
+            1
+        )
+
+        schedule = Schedule([scheduled_task_1])
+
+        power_function_2 = PowerUsageFunctionFactory().create_constant_consumption(timedelta(minutes=75), 1)
+        task_2 = Task(power_function_2, id="2")
+
+        validator = MaximumPowerConsumptionValidator(1)
+
+        # Act
+        valid = validator.validate(
+            schedule, task_2, datetime(2021, 1, 1, 16)
+        )
+
+        # Assert
+        assert not valid
