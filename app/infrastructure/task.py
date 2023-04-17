@@ -53,7 +53,12 @@ class Task:
 
         start_times: List[datetime] = []
 
+        runtime: timedelta
         for runtime in DiscreteFunctionIterator([ self.power_usage_function ]):
+            # Check for overflow.
+            if runtime.total_seconds() > start_time.timestamp():
+                continue
+
             # Calculate start times as if the task ended in the "start_time".
             early_start = start_time - runtime
             if not early_start in start_times and\

@@ -50,4 +50,4 @@ class Schedule:
         return True
 
     def copy(self) -> Schedule:
-        return Schedule(self.tasks.copy())
+        return Schedule(self.tasks.copy(), self.validator)
