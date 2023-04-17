@@ -6,7 +6,26 @@ import pytest
 from infrastructure.eletricity_prices import PricePoint
 from application.use_cases.get_spot_price_task import PostgresDatabase
 
+
 class TestPostgresDatabase:
+    def setup_method(self):
+        # Create the table
+        db = PostgresDatabase()
+        db.cursor.execute(
+            "CREATE TABLE IF NOT EXISTS pricepoint (_time TIMESTAMP WITH TIME ZONE NOT NULL PRIMARY KEY, "
+            "_price DECIMAL NOT NULL);")
+        db.conn.commit()
+        # db.cursor.close() typefejl
+
+
+    def teardown_method(self):
+        # Delete the table
+        db = PostgresDatabase()
+        db.cursor.execute('DROP TABLE pricepoint')
+        db.conn.commit()
+        # db.cursor.close()
+
+
     def test_insert_prices_success(self):
         # Arrange
         db = PostgresDatabase()
@@ -19,11 +38,12 @@ class TestPostgresDatabase:
         if pre_result is None:
             assert False
         result = pre_result[0]
-        db.cursor.execute("TRUNCATE TABLE pricepoint")
-        db.conn.commit()
+        # db.cursor.execute("TRUNCATE TABLE pricepoint")
+        # db.conn.commit()
 
         # Assert
         assert result == 2
+
 
     def test_get_prices_success(self):
         # Arrange
@@ -34,13 +54,14 @@ class TestPostgresDatabase:
         # Act
         start_time = datetime(2022, 1, 1)
         result = db.get_prices(start_time)
-        db.cursor.execute("TRUNCATE TABLE pricepoint")
-        db.conn.commit()
+        # db.cursor.execute("TRUNCATE TABLE pricepoint")
+        # db.conn.commit()
 
         # Assert
         assert len(result) == 2
         assert result[0].price == 101.0
         assert result[1].price == 100.0
+
 
     def test_get_prices_failure(self):
         # Arrange
@@ -51,11 +72,12 @@ class TestPostgresDatabase:
         # Act
         start_time = datetime(2022, 1, 3)
         result = db.get_prices(start_time)
-        db.cursor.execute("TRUNCATE TABLE pricepoint")
-        db.conn.commit()
+        # db.cursor.execute("TRUNCATE TABLE pricepoint")
+        # db.conn.commit()
 
         # Assert
         assert len(result) == 0
+
 
     def test_insert_prices_empty_input(self):
         # Arrange
@@ -69,11 +91,12 @@ class TestPostgresDatabase:
         if pre_result is None:
             assert False
         result = pre_result[0]
-        db.cursor.execute("TRUNCATE TABLE pricepoint")
-        db.conn.commit()
+        # db.cursor.execute("TRUNCATE TABLE pricepoint")
+        # db.conn.commit()
 
         # Assert
         assert result == 0
+
 
     def test_get_prices_empty_db(self):
         # Arrange
@@ -82,8 +105,8 @@ class TestPostgresDatabase:
         # Act
         start_time = datetime(2022, 1, 1)
         result = db.get_prices(start_time)
-        db.cursor.execute("TRUNCATE TABLE pricepoint")
-        db.conn.commit()
+        # db.cursor.execute("TRUNCATE TABLE pricepoint")
+        # db.conn.commit()
 
         # Assert
         assert len(result) == 0
@@ -119,6 +142,6 @@ class TestPostgresDatabase:
         result = pre_result[0]
         assert result == 1
 
-        # Cleanup
-        db.cursor.execute("TRUNCATE TABLE pricepoint")
-        db.conn.commit()
+    #     # Cleanup
+    #     db.cursor.execute("TRUNCATE TABLE pricepoint")
+    #     db.conn.commit()

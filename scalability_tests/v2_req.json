@@ -1,0 +1,60 @@
+{
+  "tasks": [
+    {
+      "duration": 50,
+      "power": 1,
+      "must_start_between": [
+        {
+          "start_interval": {
+            "start": 1681473600,
+            "duration": 50
+          }
+        }
+      ],
+      "must_end_between": [
+        {
+          "end_interval": {
+            "start": 1681480800,
+            "duration": 50
+          }
+        }
+      ],
+      "id": "string"
+    }
+  ],
+  "schedule": {
+    "tasks": [
+      {
+        "task": {
+          "duration": 0,
+          "power": 0,
+          "must_start_between": [
+            {
+              "start_interval": {
+                "start": 0,
+                "duration": 0
+              }
+            }
+          ],
+          "must_end_between": [
+            {
+              "end_interval": {
+                "start": 0,
+                "duration": 0
+              }
+            }
+          ],
+          "id": "string"
+        },
+        "start_interval": {
+          "start": 0,
+          "duration": 0
+        },
+        "cost": 0
+      }
+    ],
+    "maximum_power_consumption": {
+      "maximum_consumption": 0
+    }
+  }
+}

@@ -69,7 +69,6 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
         self.db = PostgresDatabase()
 
     def do(self, request: GetSpotPricesRequest) -> GetSpotPricesResponse:
-        print(f'GetSpotPricesUseCase: {request}')
         price_points = self.db.get_prices(request.start_time, request.ascending)
         last_price_point = self.db.get_last_price_point()
 
