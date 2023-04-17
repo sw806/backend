@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from infrastructure.must_end_between_validator import MustEndBetweenValidator
 from infrastructure.power_usage_function_factory import PowerUsageFunctionFactory
@@ -251,3 +251,21 @@ class TestMaximumPowerConsumptionValidator:
 
         # Assert
         assert valid
+
+    def test_variable_power_consuming_task_exceeds_power_consumption(self):
+        # Arrange
+        power_usage_function = PowerUsageFunctionFactory().create_variable_consumption(
+            [(timedelta(), 1), (timedelta(minutes=5), 2)], timedelta(minutes=5)
+        )
+        task = Task(power_usage_function)
+
+        validator = MaximumPowerConsumptionValidator(1)
+        schedule = Schedule([], validator)
+
+        # Act
+        valid = schedule.can_schedule_task_at(
+            task, datetime.now(tz=timezone.utc)
+        )
+
+        # Assert
+        assert not valid
