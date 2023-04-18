@@ -102,6 +102,7 @@ class Scheduler:
         for start_time in start_times:
             # If the task cannot be scheduled because of e.g. time and total power constraint.
             if not schedule.can_schedule_task_at(task, start_time):
+                print(f'Cannot schedule task {task.id} at {start_time}')
                 continue
 
             power_price_function = PowerPriceFunction(

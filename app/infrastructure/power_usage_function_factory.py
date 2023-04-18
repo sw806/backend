@@ -15,8 +15,8 @@ class PowerUsageFunctionFactory():
         )
     
     def create_variable_consumption(
-        self, power_points: List[Tuple[timedelta, float]]
+        self, power_points: List[Tuple[timedelta, float]], extend_by: timedelta = timedelta()
     ) -> PowerUsageFunction:
         return PowerUsageFunction(
-            power_points, extend_by=timedelta()
+            power_points, extend_by
         )

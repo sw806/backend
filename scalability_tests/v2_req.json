@@ -1,21 +1,21 @@
 {
   "tasks": [
     {
-      "duration": 50,
-      "power": 1,
+      "duration": 0,
+      "power": 0,
       "must_start_between": [
         {
           "start_interval": {
-            "start": 1681473600,
-            "duration": 50
+            "start": 0,
+            "duration": 0
           }
         }
       ],
       "must_end_between": [
         {
           "end_interval": {
-            "start": 1681480800,
-            "duration": 50
+            "start": 0,
+            "duration": 0
           }
         }
       ],

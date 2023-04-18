@@ -118,7 +118,6 @@ class Task:
 
         conjunction = None if len(conjunctions) is None else TaskValidatorConjunction(conjunctions)
 
-
         return ModelTask(power_usage_function, conjunction, self.id)
 
     @staticmethod
@@ -219,7 +218,7 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
     def do(self, request: ScheduleTasksRequest) -> ScheduleTasksResponse:
         # Get all price points.
         price_response = self.get_spot_prices.do(
-            GetSpotPricesRequest(datetime.now(), ascending=True)
+            GetSpotPricesRequest(datetime.now(tz=timezone.utc), ascending=True)
         )
         price_points = price_response.price_points
 
