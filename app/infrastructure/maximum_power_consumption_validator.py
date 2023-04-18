@@ -55,11 +55,9 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
     def validate(self, schedule: Schedule, task: Task, start_time: datetime) -> bool:
         current_time = start_time
         while not current_time is None:
-            print(f'Current time {current_time}')
             # Calculate runtime for task to schedule and check if it exceeds the task's duration.
             runtime = current_time - start_time
             if runtime >= task.duration:
-                print("runtime >= task.duration")
                 break
 
             # Get the task power consumption.
@@ -68,12 +66,9 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
             # Get power consumption at the current time.
             established_consumption = self.power_consumption_at(schedule.tasks, current_time)
             total_consumption = established_consumption + task_consumption
-
-            print(f'{current_time} :: {established_consumption} + {total_consumption}')
             
             # Check if we exceed the limit.
             if total_consumption > self.maximum_consumption:
-                print("total_consumption > self.maximum_consumption")
                 return False
 
             # The next point might be the next power usage point and not schedule power usage point.
@@ -85,14 +80,11 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
             next_time = self.next_power_consumption_from(
                 schedule.tasks, current_time
             )
-            print(f'next_time = {next_time}')
 
             # If we have a succeeding power consumption point then we should consider it
             if next_power_consumption_point is not None:
-                print("next_power_consumption_point is not None")
                 next_runtime = next_power_consumption_point[0]
                 next_runtime_time = next_runtime + current_time
-                print(f'Next for task {next_runtime_time} = {next_runtime} + {current_time}')
 
                 # Either we dont have a next time and can just use next runtime time or
                 # the power consumption point is the closest then that is the next step.
@@ -103,7 +95,6 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
 
             # Check if there was one if so then set current to be that.
             if next_time is None:
-                print("next_time is None")
                 break
             current_time = next_time
 
