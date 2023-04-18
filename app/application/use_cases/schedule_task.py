@@ -13,6 +13,7 @@ class ScheduleTaskRequest:
         self.duration = duration
         self.power = power
 
+@dataclass
 class ScheduleTaskResponse:
     def __init__(self, start_date: int):
         self.start_date = start_date

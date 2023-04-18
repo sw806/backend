@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import List, Optional
+from typing import Dict, List, Optional
 from pydantic.dataclasses import dataclass
 
 from application.use_cases.get_spot_price_task import GetSpotPricesRequest, GetSpotPricesResponse
@@ -147,6 +147,7 @@ class ScheduledTask:
     task: Task
     start_interval: DatetimeInterval
     cost: float
+    highest_price: Optional[float] = None
 
     @property
     def to_model(self) -> ModelScheduledTask:
@@ -155,11 +156,16 @@ class ScheduledTask:
         )
 
     @staticmethod
-    def from_model(model: ModelScheduledTask) -> ScheduledTask:
+    def from_model(model: ModelScheduledTask, highest_prices: Dict[str, float]) -> ScheduledTask:
+        highest_price = None
+        if model.task.id is not None and model.task.id in highest_prices:
+            highest_price = highest_prices[model.task.id]
+
         return ScheduledTask(
             task = Task.from_model(model.task),
             start_interval = DatetimeInterval.from_model(model.start_interval),
-            cost = model.cost
+            cost = model.cost,
+            highest_price=highest_price
         )
 
 @dataclass
@@ -176,9 +182,9 @@ class Schedule:
         return ModelSchedule(task_models, power_consumption_validator)
 
     @staticmethod
-    def from_model(model: ModelSchedule) -> Schedule:
+    def from_model(model: ModelSchedule, highest_prices: Dict[str, float]) -> Schedule:
         return Schedule(
-            tasks = [ScheduledTask.from_model(task) for task in model.tasks],
+            tasks = [ScheduledTask.from_model(task, highest_prices) for task in model.tasks],
             # FIXME: Correct set maximum power consumption constraint.
             maximum_power_consumption = None
         )
@@ -238,7 +244,8 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
             # TODO: Recommender can be abstracted away as a dependecy on the abstract reommender class as a ctor parameter.
             lowest_price_recommender = LowestPriceRecommender(spot_price_function)
             recommendation = Schedule.from_model(
-                lowest_price_recommender.recommend(new_schedules)
+                lowest_price_recommender.recommend(new_schedules),
+                lowest_price_recommender.highest_scheduled_task_prices
             )
         
         # Construct the response.

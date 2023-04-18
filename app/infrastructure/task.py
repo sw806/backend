@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 
 from infrastructure.discrete_function_iterator import DiscreteFunctionIterator
 from infrastructure.power_usage_function import PowerUsageFunction
-from infrastructure.datetime_interval import DatetimeInterval
 
 
 class TaskValidator(ABC):

@@ -1,14 +1,12 @@
 from __future__ import annotations
 from datetime import datetime, timedelta
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
-from infrastructure.eletricity_prices import PricePoint
 from infrastructure.datetime_interval import DatetimeInterval
 from infrastructure.schedule import Schedule
 from infrastructure.schedule_task import ScheduledTask
 from infrastructure.task import Task
 from infrastructure.spot_price_function import SpotPriceFunction
-from infrastructure.discrete_function_iterator import DiscreteFunctionIterator
 from infrastructure.power_price_function import PowerPriceFunction
 
 
@@ -74,18 +72,21 @@ class Scheduler:
             if not schedule.can_schedule_task_at(task, start_time):
                 continue
 
+            # Go through all succeeding starting points
+            # And for each of these points we assume we can extend to
+            # and when we encounter the first we cant extend to then we stop extending.
             for end_time in all_start_points:
                 if end_time < start_time:
                     continue
 
                 scheduleable = schedule.can_schedule_task_at(task, end_time)
 
-                if start_time is None and scheduleable:
-                    start_time = end_time
-
-                if start_time is not None and scheduleable:
+                if scheduleable:
                     interval = DatetimeInterval(start_time, end_time - start_time)
+
                     intervals.append(interval)
+                else:
+                    break
 
         return intervals
 
