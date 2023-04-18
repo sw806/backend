@@ -21,23 +21,30 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
 
         for scheduled_task in tasks:
             # Either the ext point for the task is that it is starting or that it has been running.
-            runtime = max(timedelta(), time - scheduled_task.start_interval.start)
-            next_point = scheduled_task.task.power_usage_function.next_discrete_point_from(
-                scheduled_task.task.power_usage_function.min_domain, runtime, scheduled_task.task.power_usage_function.max_domain
-            )
+            runtime = time - scheduled_task.start_interval.start
+            
+            # Either the task has not started yet and the enxt point is its start or it ccontinues from runtime.
+            if runtime < timedelta():
+                next_datetime = scheduled_task.start_interval.start
+            else:
+                next_point = scheduled_task.task.power_usage_function.next_discrete_point_from(
+                    scheduled_task.task.power_usage_function.min_domain, runtime, scheduled_task.task.power_usage_function.max_domain
+                )
 
-            # It might be that there are no succeeding point from the given "time".
-            if next_point is None:
-                continue
+                # It might be that there are no succeeding point from the given "time".
+                if next_point is None:
+                    continue
 
-            # There was a next point but we have to check if the task is running.
-            #   The complex reason for this is that the end time of the task is exclusive to its running time.
-            #   This solves the problem of starting a task immediately when a task finish.
-            #   If we did not do this then there sum time immediately at the start and finish could easily exceed the limit.
-            next_domain = scheduled_task.task.power_usage_function.get_domain(next_point)
-            next_datetime = time + next_domain
-            if not scheduled_task.runs_at(next_datetime):
-                continue
+                next_domain = scheduled_task.task.power_usage_function.get_domain(next_point)
+
+                # There was a next point but we have to check if the task is running.
+                #   The complex reason for this is that the end time of the task is exclusive to its running time.
+                #   This solves the problem of starting a task immediately when a task finish.
+                #   If we did not do this then there sum time immediately at the start and finish could easily exceed the limit.
+                next_datetime = time + next_domain
+
+                if not scheduled_task.runs_at(next_datetime):
+                    continue
 
             # However, if there was one we have to check if that is the "closest" if so then we replace "next" with it.
             if next is None or next_datetime < next:
@@ -48,9 +55,11 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
     def validate(self, schedule: Schedule, task: Task, start_time: datetime) -> bool:
         current_time = start_time
         while not current_time is None:
+            print(f'Current time {current_time}')
             # Calculate runtime for task to schedule and check if it exceeds the task's duration.
             runtime = current_time - start_time
             if runtime >= task.duration:
+                print("runtime >= task.duration")
                 break
 
             # Get the task power consumption.
@@ -59,9 +68,12 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
             # Get power consumption at the current time.
             established_consumption = self.power_consumption_at(schedule.tasks, current_time)
             total_consumption = established_consumption + task_consumption
+
+            print(f'{current_time} :: {established_consumption} + {total_consumption}')
             
             # Check if we exceed the limit.
             if total_consumption > self.maximum_consumption:
+                print("total_consumption > self.maximum_consumption")
                 return False
 
             # The next point might be the next power usage point and not schedule power usage point.
@@ -73,11 +85,14 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
             next_time = self.next_power_consumption_from(
                 schedule.tasks, current_time
             )
+            print(f'next_time = {next_time}')
 
             # If we have a succeeding power consumption point then we should consider it
             if next_power_consumption_point is not None:
+                print("next_power_consumption_point is not None")
                 next_runtime = next_power_consumption_point[0]
                 next_runtime_time = next_runtime + current_time
+                print(f'Next for task {next_runtime_time} = {next_runtime} + {current_time}')
 
                 # Either we dont have a next time and can just use next runtime time or
                 # the power consumption point is the closest then that is the next step.
@@ -88,6 +103,7 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
 
             # Check if there was one if so then set current to be that.
             if next_time is None:
+                print("next_time is None")
                 break
             current_time = next_time
 

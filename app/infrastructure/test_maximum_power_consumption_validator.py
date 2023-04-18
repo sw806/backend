@@ -269,3 +269,33 @@ class TestMaximumPowerConsumptionValidator:
 
         # Assert
         assert not valid
+    
+    def test_long_constant_power_consuming_task(self):
+        # Arrange
+
+        # "1" starts at 2021-01-01 14:00:00 and ends at 2021-01-01 19:00:00 : 1681819200
+        # "2" starts at 2021-01-01 13:00:00 and ends at 2021-01-01 18:00:00 : 1681815600
+
+        power_function_1 = PowerUsageFunctionFactory().create_constant_consumption(
+            timedelta(hours=5), 2
+        )
+        task_1 = Task(power_function_1)
+        scheduled_task_1 = ScheduledTask(
+            DatetimeInterval(datetime.fromtimestamp(1681819200), timedelta(hours=0)), task_1, 0
+        )
+
+        power_function_2 = PowerUsageFunctionFactory().create_constant_consumption(
+            timedelta(hours=5), 2
+        )
+        task_2 = Task(power_function_2)
+
+        validator = MaximumPowerConsumptionValidator(2)
+        schedule = Schedule([scheduled_task_1], validator)
+        
+        # Act
+        valid = schedule.can_schedule_task_at(
+            task_2, datetime.fromtimestamp(1681815600)
+        )
+
+        # Assert
+        assert not valid
