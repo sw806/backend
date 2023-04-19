@@ -1,0 +1,148 @@
+{
+  "tasks": [
+    {
+      "duration": 13680,
+      "power": 0.122,
+      "must_start_between": [
+        {
+          "start_interval": {
+            "start": 0,
+            "duration": 0
+          }
+        }
+      ],
+      "must_end_between": [
+        {
+          "end_interval": {
+            "start": 0,
+            "duration": 0
+          }
+        }
+      ],
+      "id": "washer"
+    }
+  ],
+  "schedule": {
+    "tasks": [
+      {
+        "task": {
+          "duration": 11280,
+          "power": 0.536,
+          "must_start_between": [
+            {
+              "start_interval": {
+                "start": 0,
+                "duration": 0
+              }
+            }
+          ],
+          "must_end_between": [
+            {
+              "end_interval": {
+                "start": 0,
+                "duration": 0
+              }
+            }
+          ],
+          "id": "dryer"
+        },
+        "start_interval": {
+          "start": 0,
+          "duration": 0
+        },
+        "cost": 0,
+        "highest_price": 0
+      },
+      {
+        "task": {
+          "duration": 13800,
+          "power": 0.141,
+          "must_start_between": [
+            {
+              "start_interval": {
+                "start": 0,
+                "duration": 0
+              }
+            }
+          ],
+          "must_end_between": [
+            {
+              "end_interval": {
+                "start": 0,
+                "duration": 0
+              }
+            }
+          ],
+          "id": "dishwasher"
+        },
+        "start_interval": {
+          "start": 0,
+          "duration": 0
+        },
+        "cost": 0,
+        "highest_price": 0
+      },
+      {
+        "task": {
+          "duration": 7200,
+          "power": 0.234,
+          "must_start_between": [
+            {
+              "start_interval": {
+                "start": 0,
+                "duration": 0
+              }
+            }
+          ],
+          "must_end_between": [
+            {
+              "end_interval": {
+                "start": 0,
+                "duration": 0
+              }
+            }
+          ],
+          "id": "TV"
+        },
+        "start_interval": {
+          "start": 0,
+          "duration": 0
+        },
+        "cost": 0,
+        "highest_price": 0
+      },
+      {
+        "task": {
+          "duration": 3600,
+          "power": 1.29,
+          "must_start_between": [
+            {
+              "start_interval": {
+                "start": 0,
+                "duration": 0
+              }
+            }
+          ],
+          "must_end_between": [
+            {
+              "end_interval": {
+                "start": 0,
+                "duration": 0
+              }
+            }
+          ],
+          "id": "Oven"
+        },
+        "start_interval": {
+          "start": 0,
+          "duration": 0
+        },
+        "cost": 0,
+        "highest_price": 0
+      }
+    ],
+    "maximum_power_consumption": {
+      "maximum_consumption": 0
+    }
+  }
+}

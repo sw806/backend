@@ -142,6 +142,3 @@ class TestPostgresDatabase:
         result = pre_result[0]
         assert result == 1
 
-    #     # Cleanup
-    #     db.cursor.execute("TRUNCATE TABLE pricepoint")
-    #     db.conn.commit()
