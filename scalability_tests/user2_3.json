@@ -1,0 +1,74 @@
+{
+    "tasks": [
+      {
+        "duration": 13800,
+        "power": 0.141,
+        "must_start_between": [
+          {
+            "start_interval": {
+              "start": 1681984800,
+              "duration": 7200
+            }
+          }
+        ],
+        "must_end_between": [
+          {
+            "end_interval": {
+              "start": 1681999200,
+              "duration": 3600
+            }
+          }
+        ],
+        "id": "dishwash"
+      }
+    ],
+    "schedule": {
+        "tasks": [
+            {
+                "task": {
+                    "duration": 13680,
+                    "power": 0.122,
+                    "must_start_between": [
+                        {
+                            "start_interval": {
+                                "start": 1681984800,
+                                "duration": 7200
+                            }
+                        }
+                    ],
+                    "must_end_between": [],
+                    "id": "washer"
+                },
+                "start_interval": {
+                    "start": 1681988400,
+                    "duration": 0
+                },
+                "cost": 0.17034860234239999,
+                "highest_price": null
+            },
+            {
+                "task": {
+                    "duration": 11280,
+                    "power": 0.536,
+                    "must_start_between": [
+                        {
+                            "start_interval": {
+                                "start": 1681984800,
+                                "duration": 7200
+                            }
+                        }
+                    ],
+                    "must_end_between": [],
+                    "id": "dryer"
+                },
+                "start_interval": {
+                    "start": 1681988400,
+                    "duration": 0
+                },
+                "cost": 0.6152565457685333,
+                "highest_price": null
+            }
+        ],
+        "maximum_power_consumption": null
+    }
+}
