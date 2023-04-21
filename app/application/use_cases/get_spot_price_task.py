@@ -18,14 +18,29 @@ class PostgresDatabase:
         self.cursor = self.conn.cursor()
 
     def get_prices(self, start_time: datetime, ascending: bool = False) -> List[PricePoint]:
-        query = f"SELECT * FROM pricepoint WHERE _time >= '{start_time.isoformat()}'"
+        rounded_earliest_hour = datetime(
+            start_time.year, start_time.month, start_time.day, start_time.hour
+        )
+        print(f'Rounded earliest hour to getprice points from db: {rounded_earliest_hour}')
+
+        query = f"SELECT * FROM pricepoint WHERE _time >= '{rounded_earliest_hour.isoformat()}'"
         if ascending:
             query += " ORDER BY _time ASC"
         else: query += " ORDER BY _time DESC"
 
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
-        return [PricePoint(datetime.fromisoformat(str(row[0])), float(row[1])) for row in rows]
+        price_points: List[PricePoint] = [PricePoint(datetime.fromisoformat(str(row[0])), float(row[1])) for row in rows]
+
+        if len(price_points):
+            if ascending:
+                earliest_price_point = price_points[0]
+            else:
+                earliest_price_point = price_points[-1]
+            
+            print(f'Earliest price point from db: {earliest_price_point.time}: {earliest_price_point.price}')
+
+        return price_points
 
     def get_last_price_point(self) -> Optional[PricePoint]:
         query = "SELECT * FROM pricepoint ORDER BY _time DESC LIMIT 1"
@@ -63,7 +78,12 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
         last_price_point = self.db.get_last_price_point()
 
         if last_price_point is None or (last_price_point.time.day <= request.start_time.day and datetime.now().hour > 13):
+            print(f'EDS request price points from {request.start_time}')
             price_points = EdsRequests().get_prices(request.start_time)
             self.db.insert_prices(price_points)
+
+        print(f'price_points: {len(price_points)}')
+        for price_point in price_points:
+            print(f'{price_point.time}: {price_point.price}')
 
         return GetSpotPricesResponse(price_points)
