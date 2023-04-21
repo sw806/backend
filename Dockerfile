@@ -15,4 +15,4 @@ COPY /app/ /app/
 
 EXPOSE 80
 
-CMD ["python", "./app/"]
+CMD ["opentelemetry-instrument", "python", "./app/"]

@@ -17,6 +17,11 @@ services:
       - network
     ports:
       - 8000:80
+    environment:
+      OTEL_SERVICE_NAME: "backend"
+      OTEL_TRACES_EXPORTER: "otlp"
+      OTEL_METRICS_EXPORTER: "none"
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://jaeger:4317"
     restart:
       on-failure
     depends_on:
@@ -40,3 +45,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  jaeger:
+    image: jaegertracing/all-in-one
+    networks:
+      - network
+    ports:
+      - 16686:16686
+      - 4317:4317
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
