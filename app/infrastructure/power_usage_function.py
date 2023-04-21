@@ -27,10 +27,6 @@ class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedel
         self.extend_by = extend_by
 
     @property
-    def min_step(self) -> timedelta:
-        return self._min_step
-
-    @property
     def min_domain(self) -> timedelta:
         return timedelta()
 

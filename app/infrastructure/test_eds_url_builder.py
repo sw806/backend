@@ -12,7 +12,7 @@ class TestEdsEndpointBuilder:
         url = builder.build()
 
         # Assert
-        assert url == f'https://api.energidataservice.dk/dataset/{dataset}'
+        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?timezone=utc'
 
     def test_with_dk1_filter(self):
         # Arrange
@@ -24,7 +24,7 @@ class TestEdsEndpointBuilder:
         url = builder.build()
 
         # Assert
-        assert url == f'https://api.energidataservice.dk/dataset/{dataset}' + '?filter={"PriceArea":["DK1"]}'
+        assert url == f'https://api.energidataservice.dk/dataset/{dataset}' + '?filter={"PriceArea":["DK1"]}&timezone=utc'
 
 
     def test_with_dk1_and_dk2_filter(self):
@@ -38,7 +38,7 @@ class TestEdsEndpointBuilder:
         url = builder.build()
 
         # Assert
-        assert url == f'https://api.energidataservice.dk/dataset/{dataset}' + '?filter={"PriceArea":["DK1","DK2"]}'
+        assert url == f'https://api.energidataservice.dk/dataset/{dataset}' + '?filter={"PriceArea":["DK1","DK2"]}&timezone=utc'
 
     def test_with_start_filter(self):
         # Arrange
@@ -50,7 +50,7 @@ class TestEdsEndpointBuilder:
         url = builder.build()
 
         # Assert
-        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?start=2023-03-07T00:00'
+        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?start=2023-03-07T00:00&timezone=utc'
 
     def test_with_end_filter(self):
         # Arrange
@@ -62,7 +62,7 @@ class TestEdsEndpointBuilder:
         url = builder.build()
 
         # Assert
-        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?end=2023-03-07T00:00'
+        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?end=2023-03-07T00:00&timezone=utc'
 
     def test_with_limit_filter(self):
         # Arrange
@@ -74,7 +74,7 @@ class TestEdsEndpointBuilder:
         url = builder.build()
 
         # Assert
-        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?limit=100'
+        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?limit=100&timezone=utc'
 
     def test_with_offset_filter(self):
         # Arrange
@@ -86,7 +86,7 @@ class TestEdsEndpointBuilder:
         url = builder.build()
 
         # Assert
-        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?offset=100'
+        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?offset=100&timezone=utc'
 
     def test_with_timezone_filter(self):
         # Arrange
@@ -98,7 +98,7 @@ class TestEdsEndpointBuilder:
         url = builder.build()
 
         # Assert
-        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?timezone=dk'
+        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?timezone=dk&timezone=utc'
 
     def test_with_sort_on_key_asending_filter(self):
         # Arrange
@@ -110,7 +110,7 @@ class TestEdsEndpointBuilder:
         url = builder.build()
 
         # Assert
-        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?sort=HourUTC ASC'
+        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?sort=HourUTC ASC&timezone=utc'
 
     def test_with_sort_on_key_desending_filter(self):
         # Arrange
@@ -122,7 +122,7 @@ class TestEdsEndpointBuilder:
         url = builder.build()
 
         # Assert
-        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?sort=HourUTC DESC'
+        assert url == f'https://api.energidataservice.dk/dataset/{dataset}?sort=HourUTC DESC&timezone=utc'
 
     def test_with_everything(self):
         # Arrange

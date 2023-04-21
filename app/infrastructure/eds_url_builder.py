@@ -87,6 +87,8 @@ class EdsUrlBuilder:
                 'filter={' + ','.join(quoted_filter) + "}"
             )
 
+        parameters.append("timezone=utc")
+        
         if len(parameters) > 0:
             base += '?' + '&'.join(parameters)
 

@@ -1,33 +1,32 @@
 from datetime import datetime, timedelta
 from typing import Optional, Tuple
+
 from infrastructure.discrete_function import DiscreteFunction
-
 from infrastructure.power_usage_function import PowerUsageFunction
-from infrastructure.spot_price_function import SpotPriceFunction
+from infrastructure.co2_emission_function import Co2EmissionFunction
 
-
-class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, float, Tuple[datetime, timedelta]]):
+class PowerEmissionFunction(DiscreteFunction[Tuple[datetime, timedelta], float, float, Tuple[datetime, timedelta]]):
     def __init__(
-        self,
-        power_usage_function: PowerUsageFunction,
-        spot_price_function: SpotPriceFunction,
-    ) -> None:
+            self,
+            power_usage_function: PowerUsageFunction,
+            emission_function: Co2EmissionFunction
+        ) -> None:
         super().__init__([])
         self.power_usage_function = power_usage_function
-        self.spot_price_function = spot_price_function
+        self.emission_function = emission_function
 
     @property
     def min_domain(self) -> Tuple[datetime, timedelta]:
-        return (self.spot_price_function.min_domain, self.power_usage_function.min_domain)
+        return (self.emission_function.min_domain, self.power_usage_function.min_domain)
 
     @property
     def max_domain(self) -> Tuple[datetime, timedelta]:
-        return (self.spot_price_function.max_domain, self.power_usage_function.max_domain)
+        return (self.emission_function.max_domain, self.power_usage_function.max_domain)
 
     def domain_order(self, a: Tuple[datetime, timedelta], b: Tuple[datetime, timedelta]) -> int:
         (a_time, a_delta) = a
         (b_time, b_delta) = b
-        time_order = self.spot_price_function.domain_order(a_time, b_time)
+        time_order = self.emission_function.domain_order(a_time, b_time)
         delta_order = self.power_usage_function.domain_order(a_delta, b_delta)
         if time_order == delta_order: return time_order
         else: raise ValueError("Time and delta order was not the same")
@@ -46,7 +45,7 @@ class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, flo
 
     def get_codomain(self, point: Tuple[datetime, timedelta]) -> float:
         (time, delta) = point
-        return self.spot_price_function.apply(time) * self.power_usage_function.apply(delta)
+        return self.emission_function.apply(time) * self.power_usage_function.apply(delta)
 
     def discrete_point_at(self, argument: Tuple[datetime, timedelta]) -> Tuple[datetime, timedelta]:
         return argument
@@ -80,7 +79,7 @@ class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, flo
         (max_time, max_delta) = global_max
 
         # Find the next times for both price and power.
-        next_time_point = self.spot_price_function.next_discrete_point_from(min_time, time, max_time)
+        next_time_point = self.emission_function.next_discrete_point_from(min_time, time, max_time)
         next_delta_point = self.power_usage_function.next_discrete_point_from(min_delta, delta, max_delta)
 
         # If both next points are None then we have reached the end.
@@ -88,7 +87,7 @@ class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, flo
             return None
 
         # If one or none of the next discrete points are none then get the domain.
-        next_time = time if next_time_point is None else self.spot_price_function.get_domain(next_time_point)
+        next_time = time if next_time_point is None else self.emission_function.get_domain(next_time_point)
         next_delta = delta if next_delta_point is None else self.power_usage_function.get_domain(next_delta_point)
 
         # The one increasing with the smallest timedelta is chosen.
@@ -118,7 +117,7 @@ class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, flo
 
         # Because of the way "next_discrete_point_from" then we have to use the price at the start of this "step".
         #   What is meant here is that the start and from includes the domain of the beginning of the next point.
-        price = self.spot_price_function.apply(start_time)
+        price = self.emission_function.apply(start_time)
         # We can just use "integral_over" instead of "integrate"
         # As our "next_discrete_point_from" takes the smallest possible step.
         # Because of this, we want "skip" any discrete points.

@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 from pydantic.dataclasses import dataclass
 
 from application.use_cases.get_spot_price_task import GetSpotPricesRequest, GetSpotPricesResponse
+from application.use_cases.get_carbon_emission_intensity import GetCarbonEmissionIntensityRequest, GetCarbonEmissionIntensityResponse
 from application.use_cases.use_Case import UseCase
 from infrastructure import (
     MaximumPowerConsumptionValidator,
@@ -20,8 +21,11 @@ from infrastructure import (
     TaskValidatorDisjunction, TaskValidatorConjunction,
     TaskValidator,
     TaskValidatorSplitter,
-    TaskValidatorSplit
+    TaskValidatorSplit,
+    Co2EmissionPoint,
+    PricePoint
 )
+from infrastructure.co2_emission_function import Co2EmissionFunction
 
 
 @dataclass
@@ -147,6 +151,8 @@ class ScheduledTask:
     start_interval: DatetimeInterval
     cost: float
     highest_price: Optional[float] = None
+    co2_emission: Optional[float] = None
+    highest_co2_emission: Optional[float] = None
 
     @property
     def to_model(self) -> ModelScheduledTask:
@@ -155,16 +161,27 @@ class ScheduledTask:
         )
 
     @staticmethod
-    def from_model(model: ModelScheduledTask, highest_prices: Dict[str, float]) -> ScheduledTask:
+    def from_model(
+        model: ModelScheduledTask,
+        highest_prices: Dict[str, float],
+        emission_function: Co2EmissionFunction,
+        highest_emissions: Dict[str, float]
+    ) -> ScheduledTask:
         highest_price = None
         if model.task.id is not None and model.task.id in highest_prices:
             highest_price = highest_prices[model.task.id]
+
+        highest_emission = None
+        if model.task.id is not None and model.task.id in highest_emissions:
+            highest_emission = highest_emissions[model.task.id]
 
         return ScheduledTask(
             task = Task.from_model(model.task),
             start_interval = DatetimeInterval.from_model(model.start_interval),
             cost = model.cost,
-            highest_price=highest_price
+            highest_price=highest_price,
+            co2_emission=model.get_max_emission(emission_function),
+            highest_co2_emission=highest_emission
         )
 
 @dataclass
@@ -181,9 +198,9 @@ class Schedule:
         return ModelSchedule(task_models, power_consumption_validator)
 
     @staticmethod
-    def from_model(model: ModelSchedule, highest_prices: Dict[str, float]) -> Schedule:
+    def from_model(model: ModelSchedule, highest_prices: Dict[str, float], emission_function: Co2EmissionFunction, highest_emission: Dict[str, float]) -> Schedule:
         return Schedule(
-            tasks = [ScheduledTask.from_model(task, highest_prices) for task in model.tasks],
+            tasks = [ScheduledTask.from_model(task, highest_prices, emission_function, highest_emission) for task in model.tasks],
             # FIXME: Correct set maximum power consumption constraint.
             maximum_power_consumption = None
         )
@@ -212,8 +229,10 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
     def __init__(
         self,
         get_spot_prices: UseCase[GetSpotPricesRequest, GetSpotPricesResponse],
+        get_emission_points: UseCase[GetCarbonEmissionIntensityRequest, GetCarbonEmissionIntensityResponse]
     ) -> None:
         self.get_spot_prices = get_spot_prices
+        self.get_emission_points = get_emission_points
 
     def do(self, request: ScheduleTasksRequest) -> ScheduleTasksResponse:
         # Get all price points.
@@ -222,8 +241,36 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
         )
         price_points = price_response.price_points
 
+        # Get all emission points.
+        emission_response = self.get_emission_points.do(
+            GetCarbonEmissionIntensityRequest(datetime.now(tz=timezone.utc), ascending=True)
+        )
+        emission_points: List[Co2EmissionPoint] = emission_response.emission_points
+
+        # Filter price and emission points
+        highest_low_domain = price_points[0].time if price_points[0].time > emission_points[0].time else emission_points[0].time
+        lowest_high_domain = price_points[-1].time if price_points[-1].time < emission_points[-1].time else emission_points[-1].time
+
+        print(f'highest_low_domain: {highest_low_domain}')
+        print(f'lowest_high_domain: {lowest_high_domain}')
+
+        filtered_price_points: List[PricePoint] = []
+        for price_point in price_points:
+            if price_point.time >= highest_low_domain and price_point.time <= lowest_high_domain:
+                filtered_price_points.append(price_point)
+
+        filtered_emission_points: List[Co2EmissionPoint] = []
+        for emission_point in emission_points:
+            if emission_point.time >= highest_low_domain and emission_point.time <= lowest_high_domain:
+                filtered_emission_points.append(emission_point)
+
         # Create spot price function.
-        spot_price_function = SpotPriceFunction(price_points)
+        spot_price_function = SpotPriceFunction(filtered_price_points)
+        print(f'spot_price_function, min: {spot_price_function.min_domain} max: {spot_price_function.max_domain}')
+
+        # Create emission function
+        emission_function = Co2EmissionFunction(filtered_emission_points)
+        print(f'emission_function, min: {emission_function.min_domain} max: {emission_function.max_domain}')
 
         # Create scheduler and base schedule.
         scheduler = Scheduler(spot_price_function)
@@ -241,10 +288,13 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
             recommendation = None
         else:
             # TODO: Recommender can be abstracted away as a dependecy on the abstract reommender class as a ctor parameter.
-            lowest_price_recommender = LowestPriceRecommender(spot_price_function)
+            lowest_price_recommender = LowestPriceRecommender(spot_price_function, emission_function)
+            print(lowest_price_recommender.highest_scheduled_task_prices)
             recommendation = Schedule.from_model(
                 lowest_price_recommender.recommend(new_schedules),
-                lowest_price_recommender.highest_scheduled_task_prices
+                lowest_price_recommender.highest_scheduled_task_prices,
+                emission_function,
+                lowest_price_recommender.highest_scheduled_emission
             )
         
         # Construct the response.

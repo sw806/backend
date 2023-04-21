@@ -2,9 +2,11 @@ from datetime import datetime, timedelta
 from typing import List
 
 from infrastructure.discrete_function_iterator import DiscreteFunctionIterator
+from infrastructure.power_emission_function import PowerEmissionFunction
 from infrastructure.datetime_interval import DatetimeInterval
 from infrastructure.power_price_function import PowerPriceFunction
 from infrastructure.spot_price_function import SpotPriceFunction
+from infrastructure.co2_emission_function import Co2EmissionFunction
 from infrastructure.task import Task
 
 
@@ -55,6 +57,31 @@ class ScheduledTask:
 
         return greatest_consumption
 
+    def get_max_emission(self, emission_function: Co2EmissionFunction) -> float:
+        power_emission_function = PowerEmissionFunction(
+            self.task.power_usage_function, emission_function
+        )
+
+        greatest_emission = power_emission_function.integrate_from_to(
+            self.start_interval.start, self.task.duration
+        )
+
+        runtime_iterator = DiscreteFunctionIterator(
+            [self.task.power_usage_function], end=self.start_interval.duration
+        )
+        for current_runtime in runtime_iterator:
+            if current_runtime > self.start_interval.duration:
+                break
+
+            current_emission = power_emission_function.integrate_from_to(
+                self.start_interval.start + current_runtime, self.task.duration
+            )
+
+            if current_emission > greatest_emission:
+                greatest_emission = current_emission
+        
+        return greatest_emission
+
     def get_max_total_price(self, price_function: SpotPriceFunction) -> float:
         power_price_function = PowerPriceFunction(
             self.task.power_usage_function, price_function
@@ -68,6 +95,9 @@ class ScheduledTask:
             [self.task.power_usage_function], end=self.start_interval.duration
         )
         for current_runtime in runtime_iterator:
+            if current_runtime > self.start_interval.duration:
+                break
+            
             current_price = power_price_function.integrate_from_to(
                 self.start_interval.start + current_runtime, self.task.duration
             )
