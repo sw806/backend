@@ -77,7 +77,7 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
         price_points = self.db.get_prices(request.start_time, request.ascending)
         last_price_point = self.db.get_last_price_point()
 
-        if last_price_point is None or (last_price_point.time.day <= request.start_time.day and datetime.now().hour > 13):
+        if len(price_points) == 0 or last_price_point is None or (last_price_point.time.day <= request.start_time.day and datetime.now().hour > 13):
             print(f'EDS request price points from {request.start_time}')
             price_points = EdsRequests().get_prices(request.start_time)
             self.db.insert_prices(price_points)
