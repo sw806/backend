@@ -67,13 +67,13 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
             raise Exception("Requesting spot prices exceeeding elspot prices")
 
         # Case 1: The requested time is earlier than what we have.
-        elif earliest_price_point is not None and request.start_time < earliest_price_point_time:
+        elif earliest_price_point_time is not None and request.start_time < earliest_price_point_time:
             print(f'Requested prices earlier than stored: {request.start_time} -> {earliest_price_point_time}')
             price_points = EdsRequests().get_prices(request.start_time, earliest_price_point_time)
             self.db.insert_prices(price_points)
 
         # Case 2: The requested time is later than what we have
-        elif latest_price_point is not None and request.start_time > latest_price_point_time:
+        elif latest_price_point_time is not None and request.start_time > latest_price_point_time:
             print(f'Requested prices later than stored: {request.start_time} -> {latest_price_point_time}')
             price_points = EdsRequests().get_prices(latest_price_point_time)
             self.db.insert_prices(price_points)
@@ -85,7 +85,7 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
             self.db.insert_prices(price_points)
 
         # Case 4: Latest price point is earlier than avaialble point.
-        elif latest_price_point is not None and latest_price_point_time < latest_available_spot_price:
+        elif latest_price_point_time is not None and latest_price_point_time < latest_available_spot_price:
             print(f'Latest price point is earlier than avaialble point')
             price_points = EdsRequests().get_prices(latest_price_point_time)
             self.db.insert_prices(price_points)

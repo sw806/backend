@@ -3,7 +3,8 @@ from application.use_cases.schedule_tasks import ScheduleTasksRequest, ScheduleT
 from ..use_cases import (
     ScheduleTaskUseCase, ScheduleTaskRequest, ScheduleTaskResponse,
     CheckStatusUseCase, CheckStatusRequest, CheckStatusResponse,
-    GetSpotPricesUseCase, GetSpotPricesRequest, GetSpotPricesResponse
+    GetSpotPricesUseCase, GetSpotPricesRequest, GetSpotPricesResponse,
+    GetCarbonEmissionIntensityUseCase, GetCarbonEmissionIntensityRequest, GetCarbonEmissionIntensityResponse
 )
 from infrastructure import (
     EdsRequests
@@ -13,10 +14,11 @@ class User:
     def __init__(self) -> None:
         eds = EdsRequests()
         self._get_elspot_prices = GetSpotPricesUseCase()
+        self._get_emissions = GetCarbonEmissionIntensityUseCase(eds)
         self._schedule_task = ScheduleTaskUseCase()
         self._schedule_tasks = ScheduleTasksUseCase(
             self._get_elspot_prices,
-            GetCarbonEmissionIntensityUseCase(eds)
+            self._get_emissions
         )
         self._check_status = CheckStatusUseCase()
 
@@ -31,3 +33,6 @@ class User:
     
     def get_elspot_prices(self, request: GetSpotPricesRequest) -> GetSpotPricesResponse:
         return self._get_elspot_prices.do(request)
+
+    def get_emissions(self, request: GetCarbonEmissionIntensityRequest) -> GetCarbonEmissionIntensityResponse:
+        return self._get_emissions.do(request)

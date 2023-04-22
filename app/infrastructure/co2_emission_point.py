@@ -1,9 +1,14 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from pydantic.dataclasses import dataclass
 
 
+@dataclass
 class Co2EmissionPoint:
+    time: datetime
+    emission: float
+    
     def __init__(self, time: datetime, emission: float) -> None:
         self.time = time
         self.emission = emission
