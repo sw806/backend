@@ -1,8 +1,13 @@
 from abc import ABC, abstractmethod
 from datetime import time, datetime
 from typing import Any, Dict, List, Optional
+from pydantic.dataclasses import dataclass
 
+@dataclass
 class PricePoint:
+    time: datetime
+    price: float
+
     def __init__(self, time: datetime, price: float) -> None:
         self.time = time
         self.price = price

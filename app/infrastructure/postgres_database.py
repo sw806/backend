@@ -16,12 +16,7 @@ class PostgresDatabase:
         self.cursor = self.conn.cursor()
 
     def get_prices(self, start_time: datetime, ascending: bool = False) -> List[PricePoint]:
-        rounded_earliest_hour = datetime(
-            start_time.year, start_time.month, start_time.day, start_time.hour
-        )
-        print(f'Rounded earliest hour to getprice points from db: {rounded_earliest_hour}')
-
-        query = f"SELECT * FROM pricepoint WHERE _time >= '{rounded_earliest_hour.isoformat()}'"
+        query = f"SELECT * FROM pricepoint WHERE _time >= '{start_time.isoformat()}'"
         if ascending:
             query += " ORDER BY _time ASC"
         else: query += " ORDER BY _time DESC"
@@ -30,18 +25,19 @@ class PostgresDatabase:
         rows = self.cursor.fetchall()
         price_points: List[PricePoint] = [PricePoint(datetime.fromisoformat(str(row[0])), float(row[1])) for row in rows]
 
-        if len(price_points):
-            if ascending:
-                earliest_price_point = price_points[0]
-            else:
-                earliest_price_point = price_points[-1]
-            
-            print(f'Earliest price point from db: {earliest_price_point.time}: {earliest_price_point.price}')
-
         return price_points
 
-    def get_last_price_point(self) -> Optional[PricePoint]:
+    def get_latest_price_point(self) -> Optional[PricePoint]:
         query = "SELECT * FROM pricepoint ORDER BY _time DESC LIMIT 1"
+        self.cursor.execute(query)
+        row = self.cursor.fetchone()
+
+        if row is None:
+            return None
+        return PricePoint(datetime.fromisoformat(str(row[0])), float(row[1]))
+
+    def get_earliest_price_point(self) -> Optional[PricePoint]:
+        query = "SELECT * FROM pricepoint ORDER BY _time ASC LIMIT 1"
         self.cursor.execute(query)
         row = self.cursor.fetchone()
 

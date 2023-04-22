@@ -247,29 +247,12 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
         )
         emission_points: List[Co2EmissionPoint] = emission_response.emission_points
 
-        # Filter price and emission points
-        highest_low_domain = price_points[0].time if price_points[0].time > emission_points[0].time else emission_points[0].time
-        lowest_high_domain = price_points[-1].time if price_points[-1].time < emission_points[-1].time else emission_points[-1].time
-
-        print(f'highest_low_domain: {highest_low_domain}')
-        print(f'lowest_high_domain: {lowest_high_domain}')
-
-        filtered_price_points: List[PricePoint] = []
-        for price_point in price_points:
-            if price_point.time >= highest_low_domain and price_point.time <= lowest_high_domain:
-                filtered_price_points.append(price_point)
-
-        filtered_emission_points: List[Co2EmissionPoint] = []
-        for emission_point in emission_points:
-            if emission_point.time >= highest_low_domain and emission_point.time <= lowest_high_domain:
-                filtered_emission_points.append(emission_point)
-
         # Create spot price function.
-        spot_price_function = SpotPriceFunction(filtered_price_points)
+        spot_price_function = SpotPriceFunction(price_points)
         print(f'spot_price_function, min: {spot_price_function.min_domain} max: {spot_price_function.max_domain}')
 
         # Create emission function
-        emission_function = Co2EmissionFunction(filtered_emission_points)
+        emission_function = Co2EmissionFunction(emission_points)
         print(f'emission_function, min: {emission_function.min_domain} max: {emission_function.max_domain}')
 
         # Create scheduler and base schedule.

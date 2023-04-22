@@ -61,6 +61,12 @@ class EdsRequests(ElectricityPrices, CO2EmissionsRepository):
 
 
     def get_prices(self, start: Optional[datetime] = None, end: Optional[datetime] = None) -> List[PricePoint]:
+        start = start.replace(
+            minute=0,
+            second=0,
+            microsecond=0
+        )
+
         # Builds URL for Eds "Elspotprices" dataset.
         builder = EdsUrlBuilder("Elspotprices") \
             .add_to_filter("PriceArea", "DK1") \
@@ -73,6 +79,8 @@ class EdsRequests(ElectricityPrices, CO2EmissionsRepository):
             builder.set_end(end)
 
         url = builder.build()
+
+        print(f'EDS get prices url: {url}')
 
         try:
             response: Response = requests.get(url)
@@ -91,8 +99,8 @@ class EdsRequests(ElectricityPrices, CO2EmissionsRepository):
         price_points: List[PricePoint] = []
         for record in json:
             try:
-                time: datetime = datetime.fromisoformat(record['HourUTC']) \
-                    .astimezone(timezone.utc)
+                time: datetime = datetime.fromisoformat(record['HourUTC'])
+                time = time.replace(tzinfo=timezone.utc)
             except KeyError as exc:
                 raise KeyError("Missing 'HourUTC' in price point record", record) from exc
             except ValueError as exc:
