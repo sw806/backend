@@ -58,6 +58,12 @@ class ScheduledTask:
         return greatest_consumption
 
     def get_max_emission(self, emission_function: Co2EmissionFunction) -> float:
+        if self.start_interval.start < emission_function.min_domain:
+            return 0
+        
+        if self.start_interval.start + self.task.duration > emission_function.max_domain:
+            return 0
+
         power_emission_function = PowerEmissionFunction(
             self.task.power_usage_function, emission_function
         )
