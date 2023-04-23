@@ -1,70 +1,48 @@
-import datetime
 import json
-import random
 import time
 
-# specify the range of random numbers
+# Emulates a user planning for washer, dryer, dishwasher, and TV
 
-DURATION_MIN_RANGE = 30
-DURATION_MAX_RANGE = 180
-
-POWER_MIN_RANGE = 0.5
-POWER_MAX_RANGE = 2.5 # Miele
-
-START_INTERVAL_START_MIN_RANGE = int(time.time())
-START_INTERVAL_START_MAX_RANGE = int(time.time()) + 43200 # 12 hours
-START_INTERVAL_DURATION_MIN_RANGE = 0
-START_INTERVAL_DURATION_MAX_RANGE = 10800 # 3 hours (skøn)
-
-END_INTERVAL_START_MIN_RANGE = int(time.time()) + 1
-END_INTERVAL_START_MAX_RANGE = int(time.time()) + 43201 # 12 hours + 1 second
-END_INTERVAL_DURATION_MIN_RANGE = 0
-END_INTERVAL_DURATION_MAX_RANGE = 10800 # 3 hours (skøn)
-
-COST_MIN_RANGE = 1
-COST_MAX_RANGE = 10
-
-MAX_CONSUMPTION_MIN_RANGE = 0.25
-MAX_CONSUMPTION_MAX_RANGE = 7.5
-
-
-def generate_json() -> str: # TODO add constant values
-    data = {
-    "tasks": [
+def generate_json():
+    now = int(time.time())
+    # now = 1682071200
+    start_interval = {"start": now, "duration": 7200}
+    end_interval = {"start": now + 14400, "duration": 7200}
+    tasks = [
         {
-            "id": "2",
-            "duration": 3600,
-            "power": 1,
-            "must_start_between": [],
-            "must_end_between": []
+            "duration": 13680,
+            "power": 0.122,
+            "must_start_between": [{"start_interval": start_interval}],
+            "must_end_between": [{"end_interval": end_interval}],
+            "id": "washer"
+        },
+        {
+            "duration": 11280,
+            "power": 0.536,
+            "must_start_between": [{"start_interval": start_interval}],
+            "must_end_between": [{"end_interval": {"start": now + 14400, "duration": 3600}}],
+            "id": "dryer"
+        },
+        {
+            "duration": 13800,
+            "power": 0.141,
+            "must_start_between": [{"start_interval": start_interval}],
+            "must_end_between": [{"end_interval": {"start": now + 14400, "duration": 3600}}],
+            "id": "dishwash"
+        },
+        {
+            "duration": 7200,
+            "power": 0.234,
+            "must_start_between": [{"start_interval": start_interval}],
+            "must_end_between": [{"end_interval": {"start": now + 14400, "duration": 3600}}],
+            "id": "TV"
         }
-    ],
-    "schedule": {
-        "tasks": [
-            {
-                "task": {
-                    "duration": 3600,
-                    "power": 1.0,
-                    "must_start_between": [],
-                    "must_end_between": [],
-                    "id": "1"
-                },
-                "start_interval": {
-                    "start": 1681743600,
-                    "duration": 0
-                },
-                "cost": 0.691
-            }
-        ],
-        "maximum_power_consumption": {
-            "maximum_consumption": 1
-        }
-    }
-}
+    ]
+    schedule = {"tasks": [], "maximum_power_consumption": {"maximum_consumption": 2}}
+    data = {"tasks": tasks, "schedule": schedule}
 
-    return json.dumps(data)
+    # save data to file
+    with open("test.json", "w") as f:
+        json.dump(data, f)
 
-
-if __name__ == "__main__":
-    result = generate_json()
-    print(result)
+    return data

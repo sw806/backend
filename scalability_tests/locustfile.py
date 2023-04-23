@@ -15,36 +15,9 @@ class ScalabilityTester(HttpUser):
 
     @task(1)
     def v2_schedules(self):
-        with open("/home/dremacs/Dropbox/2023/sem8/P8/backend/scalability_tests/user2_1.json") as f:
-            param = json.load(f)
+        param = generate_json()
 
         response = self.client.post("/api/v2/schedules", json=param)
         if response.status_code != 200:
             print(f"Failed request with status code: {response.status_code}, content: {response.content}")
 
-    @task(1)
-    def v2_schedules(self):
-        with open("/home/dremacs/Dropbox/2023/sem8/P8/backend/scalability_tests/user2_2.json") as f:
-            param = json.load(f)
-
-        response = self.client.post("/api/v2/schedules", json=param)
-        if response.status_code != 200:
-            print(f"Failed request with status code: {response.status_code}, content: {response.content}")
-
-    @task(1)
-    def v2_schedules(self):
-        with open("/home/dremacs/Dropbox/2023/sem8/P8/backend/scalability_tests/user2_3.json") as f:
-            param = json.load(f)
-
-        response = self.client.post("/api/v2/schedules", json=param)
-        if response.status_code != 200:
-            print(f"Failed request with status code: {response.status_code}, content: {response.content}")
-
-    @task(1)
-    def v2_schedules(self):
-        with open("/home/dremacs/Dropbox/2023/sem8/P8/backend/scalability_tests/user2_4.json") as f:
-            param = json.load(f)
-
-        response = self.client.post("/api/v2/schedules", json=param)
-        if response.status_code != 200:
-            print(f"Failed request with status code: {response.status_code}, content: {response.content}")
