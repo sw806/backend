@@ -4,9 +4,92 @@ from infrastructure.discrete_function import DiscreteFunction
 
 from infrastructure.power_usage_function import PowerUsageFunction
 from infrastructure.spot_price_function import SpotPriceFunction
+from infrastructure.zipped_discrete_function import ZippedDiscreteFunction
+from infrastructure.eletricity_prices import PricePoint
+from infrastructure.discrete_function_iterator import DiscreteFunctionIterator
+from infrastructure.scheduled_power_usage_function import ScheduledPowerUsageFunction
 
 
-class PowerPriceFunction(DiscreteFunction[Tuple[datetime, timedelta], float, float, Tuple[datetime, timedelta]]):
+class ZippedPowerPriceFunction(
+    ZippedDiscreteFunction[
+        # Domains
+        datetime, timedelta, 
+        # Codomains
+        float, float,
+        # Integrals 
+        float, float, 
+        # discrete points
+        PricePoint, Tuple[timedelta, float],
+        # Step
+        timedelta
+    ]
+):
+    def __init__(
+        self,
+        power_usage_function: PowerUsageFunction,
+        spot_price_function: SpotPriceFunction,
+    ) -> None:
+        super().__init__(spot_price_function, power_usage_function)
+    
+    def min_step(start, step_1: timedelta, step_2: timedelta) -> timedelta:
+        return min(step_1, step_2)
+
+    def step_lengths(
+        self, 
+        start: Tuple[datetime, timedelta], 
+        end: Tuple[datetime, timedelta]
+    ) -> Tuple[timedelta, timedelta]:
+        (start_1, start_2) = start
+        (end_1, end_2) = end
+        return (
+            end_1 - start_1,
+            end_2 - start_2
+        )
+
+    def step_by(
+        self, 
+        start: Tuple[datetime, timedelta], 
+        step: timedelta
+    ) -> Tuple[datetime, timedelta]:
+        (start_1, start_2) = start
+        return (start_1 + step, start_2 + step)
+
+    def combine_codomains(
+        self, 
+        a: Tuple[float, float], 
+        b: Tuple[float, float]
+    ) -> Tuple[float, float]:
+        (a_1, a_2) = a
+        (b_1, b_2) = b
+        return (a_1 + b_1, a_2 + b_2)
+
+    def combine_integrals(
+        self, 
+        a: Tuple[float, float], 
+        b: Tuple[float, float]
+    ) -> Tuple[float, float]:
+        (a_1, a_2) = a
+        (b_1, b_2) = b
+        return (a_1 + b_1, a_2 + b_2)
+
+    def integral_over(
+        self, 
+        min: Tuple[datetime, timedelta], start: Tuple[datetime, timedelta],
+        max: Tuple[datetime, timedelta], end: Tuple[datetime, timedelta],
+    ) -> Tuple[float, float]:
+        (min_1, min_2) = min
+        (start_1, start_2) = start
+        (max_1, max_2) = max
+        (end_1, end_2) = end
+        
+        return (
+            self.function_1.integral_over(min_1, start_1, max_1, end_1),
+            self.function_2.integral_over(min_2, start_2, max_2, end_2),
+        )
+
+class PowerPriceFunction(
+    DiscreteFunction[Tuple[datetime, timedelta], float, float, Tuple[datetime, timedelta]]
+):
     def __init__(
         self,
         power_usage_function: PowerUsageFunction,

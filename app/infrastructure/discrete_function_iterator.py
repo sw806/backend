@@ -4,7 +4,6 @@ from infrastructure.discrete_function import DiscreteFunction, TDiscretePoint
 from infrastructure.function import TCodomain, TDomain, TIntegral
 
 
-
 class DiscreteFunctionIterator(Iterator, Generic[TDomain, TCodomain, TIntegral, TDiscretePoint]):
     current: Optional[TDomain]
 
@@ -35,7 +34,6 @@ class DiscreteFunctionIterator(Iterator, Generic[TDomain, TCodomain, TIntegral, 
         self.current = start
         self.start = start
         self.end = end
-
 
     def get_next_from(self, argument: Optional[TDomain]) -> Optional[TDomain]:
         if argument is None: return None

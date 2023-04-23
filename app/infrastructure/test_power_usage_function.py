@@ -1,9 +1,10 @@
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import List, Tuple
 from random import random
 
 from infrastructure.power_usage_function import PowerUsageFunction
+from infrastructure.scheduled_power_usage_function import ScheduledPowerUsageFunction
 
 
 class TestPowerUsageFunction:
@@ -292,3 +293,40 @@ class TestPowerUsageFunction:
 
             # Assert
             assert sum == expected
+
+    def test_scheduled_power_usage_function_next_discrete_point(self):
+        # Arrange
+        power_points: List[Tuple[timedelta, float]] = [
+            (timedelta(hours=1), 1),
+            (timedelta(hours=2), 2),
+            (timedelta(hours=3), 3),
+            (timedelta(hours=4), 4),
+            (timedelta(hours=5), 5),
+            (timedelta(hours=6), 6),
+            (timedelta(hours=7), 7),
+            (timedelta(hours=8), 8)
+        ]
+        power_usage_function = PowerUsageFunction(power_points, extend_by=timedelta(hours=1))
+
+        start = datetime(2015, 10, 20, 15)
+        scheduled_power_usage_function = ScheduledPowerUsageFunction(start, power_usage_function)
+
+        min = scheduled_power_usage_function.min_domain
+        max = scheduled_power_usage_function.max_domain
+
+        # Act
+        next_1 = scheduled_power_usage_function.next_discrete_point_from(min, start, max)
+        if next_1 is None: assert False
+        next_2 = scheduled_power_usage_function.next_discrete_point_from(
+            min, scheduled_power_usage_function.get_domain(next_1), max
+        )
+        if next_2 is None: assert False
+        next_3 = scheduled_power_usage_function.next_discrete_point_from(
+            min, scheduled_power_usage_function.get_domain(next_2), max
+        )
+        if next_3 is None: assert False
+
+        # Assert
+        assert next_1 == (datetime(2015, 10, 20, 16), 1)
+        assert next_2 == (datetime(2015, 10, 20, 17), 2)
+        assert next_3 == (datetime(2015, 10, 20, 18), 3)

@@ -22,8 +22,7 @@ from infrastructure import (
     TaskValidator,
     TaskValidatorSplitter,
     TaskValidatorSplit,
-    Co2EmissionPoint,
-    PricePoint
+    Co2EmissionPoint
 )
 from infrastructure.co2_emission_function import Co2EmissionFunction
 
