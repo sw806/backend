@@ -8,8 +8,6 @@ from infrastructure.spot_price_function import SpotPriceFunction
 from infrastructure.co2_emission_function import Co2EmissionFunction
 from infrastructure.task import Task
 
-from opentelemetry import trace
-tracer = trace.get_tracer(__name__)
 
 class ScheduleValidator(ABC):
     def __init__(self) -> None:
@@ -35,11 +33,10 @@ class Schedule:
         self.tasks.append(task)
 
     def get_total_price(self, price_function: SpotPriceFunction) -> float:
-        with tracer.start_as_current_span("GetTotalPrice"):
-            total_price = 0.0
-            for task in self.tasks:
-                total_price += task.get_max_total_price(price_function)
-            return total_price
+        total_price = 0.0
+        for task in self.tasks:
+            total_price += task.get_max_total_price(price_function)
+        return total_price
 
     def get_total_emission(self, emission_function: Co2EmissionFunction) -> float:
         total_emission = 0.0
