@@ -52,7 +52,8 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
                 day=latest_available_spot_price.day + 1,
                 hour=21, # It is not 23 because we work with utc
                 minute=0,
-                second=0
+                second=0,
+                microsecond=0
             )
         else:
             # The spot prices have NOT been released yet.
@@ -60,11 +61,12 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
                 day=latest_available_spot_price.day,
                 hour=22,
                 minute=0,
-                second=0
+                second=0,
+                microsecond=0
             )
-
-        print(f'Get spot prices with latest {latest_available_spot_price} for {request.start_time}')
-
+        
+        print(f'Get spot prices with latest available {latest_available_spot_price} for {request.start_time} with {latest_price_point_time} stored')
+        
         # Case 0: The spot prices we are asking for have not been released yet.
         if request.start_time > latest_available_spot_price:
             raise Exception("Requesting spot prices exceeeding elspot prices")
@@ -80,7 +82,7 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
             print(f'Requested prices later than stored: {request.start_time} -> {latest_price_point_time}')
             price_points = EdsRequests().get_prices(latest_price_point_time)
             self.db.insert_prices(price_points)
-
+        
         # Case 3: We have no price points yet.
         elif latest_price_point is None and earliest_price_point is None:
             print(f'Initial spot price EDS request')
