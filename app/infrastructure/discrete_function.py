@@ -3,6 +3,8 @@ from datetime import timedelta
 from typing import Generic, List, Optional, TypeVar
 from infrastructure.function import Function, TCodomain, TDomain, TIntegral
 
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
 
 TDiscretePoint = TypeVar("TDiscretePoint")
 class DiscreteFunction(
@@ -66,26 +68,27 @@ class DiscreteFunction(
         start_domain: Optional[TDomain] = None,
         end_domain: Optional[TDomain] = None
     ) -> List[TDiscretePoint]:
-        if start_domain is None: start_domain = self.min_domain
-        if end_domain is None: end_domain = self.max_domain
+        with tracer.start_as_current_span("GetAllDiscretePoints"):
+            if start_domain is None: start_domain = self.min_domain
+            if end_domain is None: end_domain = self.max_domain
 
-        points: List[TDiscretePoint] = []
+            points: List[TDiscretePoint] = []
 
-        current_domain = start_domain
-        current_point = self.discrete_point_at(current_domain)
+            current_domain = start_domain
+            current_point = self.discrete_point_at(current_domain)
 
-        while self.domain_order(current_domain, end_domain) < 0:
-            points.append(current_point)
+            while self.domain_order(current_domain, end_domain) < 0:
+                points.append(current_point)
 
-            current_domain = self.get_domain(current_point)
-            next_point = self.next_discrete_point_from(
-                start_domain, current_domain, end_domain
-            )
+                current_domain = self.get_domain(current_point)
+                next_point = self.next_discrete_point_from(
+                    start_domain, current_domain, end_domain
+                )
 
-            if next_point is None: break
-            current_point = next_point
+                if next_point is None: break
+                current_point = next_point
 
-        return points
+            return points
 
     def is_in_same_discrete_point(self, min: TDomain, a: TDomain, b: TDomain, max: TDomain) -> bool:
         return self.discrete_point_at(a) == self.discrete_point_at(b)
@@ -111,19 +114,20 @@ class DiscreteFunction(
         self,
         min: TDomain, argument: TDomain, max: TDomain,
     ) -> TCodomain:
-        current_codomain: TCodomain = self.apply(argument)
+        with tracer.start_as_current_span("SumHelper"):
+            current_codomain: TCodomain = self.apply(argument)
 
-        # Max is exclusive
-        if argument == max: return current_codomain
+            # Max is exclusive
+            if argument == max: return current_codomain
 
-        next_point: Optional[TDiscretePoint] = self.next_discrete_point_from(min, argument, max)
-        if next_point is None:
-            return current_codomain
+            next_point: Optional[TDiscretePoint] = self.next_discrete_point_from(min, argument, max)
+            if next_point is None:
+                return current_codomain
 
-        next_domain: TDomain = self.get_domain(next_point)
-        return self.combine_codomains(
-            current_codomain, self.sum_helper(min, next_domain, max)
-        )
+            next_domain: TDomain = self.get_domain(next_point)
+            return self.combine_codomains(
+                current_codomain, self.sum_helper(min, next_domain, max)
+            )
 
     def sum(self, start: TDomain, end: TDomain) -> TCodomain:
         return self.sum_helper(start, start, end)
@@ -141,47 +145,48 @@ class DiscreteFunction(
         min: TDomain, start: TDomain,
         max: TDomain, end: TDomain
     ) -> TIntegral:
-        next_to_first_point = self.next_discrete_point_from(min, start, max)
+        with tracer.start_as_current_span("IntegralHelper"):
+            next_to_first_point = self.next_discrete_point_from(min, start, max)
 
-        # We are in the same point, or
-        # we are not in the same point. But the "end" value is the domain value of the next from start.
-        #   This check is required because the minimum step from getting the enxt point
-        #   includes the next point time. This means that even though an an integral will be [a, b)
-        #   we get [a, b] intervals which means the same if the "end" is precisely the "end" domain.
-        #   Ultimately this hinders floating point erros happening.
-        if self.is_in_same_discrete_point(min, start, end, max) or \
-            not next_to_first_point is None and end == self.get_domain(next_to_first_point):
-            return self.integral_over(
-                min, start, 
+            # We are in the same point, or
+            # we are not in the same point. But the "end" value is the domain value of the next from start.
+            #   This check is required because the minimum step from getting the enxt point
+            #   includes the next point time. This means that even though an an integral will be [a, b)
+            #   we get [a, b] intervals which means the same if the "end" is precisely the "end" domain.
+            #   Ultimately this hinders floating point erros happening.
+            if self.is_in_same_discrete_point(min, start, end, max) or \
+                not next_to_first_point is None and end == self.get_domain(next_to_first_point):
+                return self.integral_over(
+                    min, start,
+                    max, end
+                )
+
+            next_to_last_point: TDiscretePoint = self.discrete_point_at(end)
+            next_to_last_domain = self.get_domain(next_to_last_point)
+
+            # To keep the algorithm clear one can remove this check where the "start" and "middle" split can is condially computed.
+            # This means that if "next_point" is "None" then "start_integral" and "middle_integral" is always "0".
+            end_integral = self.integrate_helper(
+                min, next_to_last_domain,
                 max, end
             )
+            integral = end_integral
+            if not next_to_first_point is None:
+                next_to_first_domain = self.get_domain(next_to_first_point)
+                start_integral = self.integrate_helper(
+                    min, start,
+                    max, next_to_first_domain
+                )
+                middle_integral = self.integrate_helper(
+                    min, next_to_first_domain,
+                    max, next_to_last_domain
+                )
+                integral = self.combine_integrals(
+                    integral,
+                    self.combine_integrals(start_integral, middle_integral)
+                )
 
-        next_to_last_point: TDiscretePoint = self.discrete_point_at(end)
-        next_to_last_domain = self.get_domain(next_to_last_point)
-
-        # To keep the algorithm clear one can remove this check where the "start" and "middle" split can is condially computed.
-        # This means that if "next_point" is "None" then "start_integral" and "middle_integral" is always "0".
-        end_integral = self.integrate_helper(
-            min, next_to_last_domain,
-            max, end
-        )
-        integral = end_integral
-        if not next_to_first_point is None:
-            next_to_first_domain = self.get_domain(next_to_first_point)
-            start_integral = self.integrate_helper(
-                min, start,
-                max, next_to_first_domain
-            )
-            middle_integral = self.integrate_helper(
-                min, next_to_first_domain,
-                max, next_to_last_domain
-            )
-            integral = self.combine_integrals(
-                integral,
-                self.combine_integrals(start_integral, middle_integral)
-            )
-
-        return integral
+            return integral
 
     def integrate(self, start: TDomain, end: TDomain) -> TIntegral:
         return self.integrate_helper(start, start, end, end)

@@ -7,6 +7,8 @@ from infrastructure.schedule_task import ScheduledTask
 from infrastructure.spot_price_function import SpotPriceFunction
 from infrastructure.task import Task
 
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
 
 class ScheduleValidator(ABC):
     def __init__(self) -> None:
@@ -32,10 +34,11 @@ class Schedule:
         self.tasks.append(task)
 
     def get_total_price(self, price_function: SpotPriceFunction) -> float:
-        total_price = 0.0
-        for task in self.tasks:
-            total_price += task.get_max_total_price(price_function)
-        return total_price
+        with tracer.start_as_current_span("GetTotalPrice"):
+            total_price = 0.0
+            for task in self.tasks:
+                total_price += task.get_max_total_price(price_function)
+            return total_price
 
     def can_schedule_task_at(self, task: Task, start_time: datetime) -> bool:
         if self.validator is None:

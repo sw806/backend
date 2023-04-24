@@ -5,13 +5,17 @@ from ..use_cases import (
     CheckStatusUseCase, CheckStatusRequest, CheckStatusResponse
 )
 
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
+
 class User:
     def __init__(self) -> None:
-        self._schedule_task = ScheduleTaskUseCase()
-        self._schedule_tasks = ScheduleTasksUseCase(
-            GetSpotPricesUseCase()
-        )
-        self._check_status = CheckStatusUseCase()
+        with tracer.start_as_current_span("InitUser"):
+            self._schedule_task = ScheduleTaskUseCase()
+            self._schedule_tasks = ScheduleTasksUseCase(
+                GetSpotPricesUseCase()
+            )
+            self._check_status = CheckStatusUseCase()
 
     def schedule_task(self, request: ScheduleTaskRequest) -> ScheduleTaskResponse:
         return self._schedule_task.do(request)

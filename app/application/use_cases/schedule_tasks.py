@@ -23,6 +23,8 @@ from infrastructure import (
     TaskValidatorSplit
 )
 
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
 
 @dataclass
 class DatetimeInterval:
@@ -213,42 +215,44 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
         self,
         get_spot_prices: UseCase[GetSpotPricesRequest, GetSpotPricesResponse],
     ) -> None:
-        self.get_spot_prices = get_spot_prices
+        with tracer.start_as_current_span("InitScheduleTasksUseCase"):
+            self.get_spot_prices = get_spot_prices
 
     def do(self, request: ScheduleTasksRequest) -> ScheduleTasksResponse:
-        # Get all price points.
-        price_response = self.get_spot_prices.do(
-            GetSpotPricesRequest(datetime.now(tz=timezone.utc), ascending=True)
-        )
-        price_points = price_response.price_points
-
-        # Create spot price function.
-        spot_price_function = SpotPriceFunction(price_points)
-
-        # Create scheduler and base schedule.
-        scheduler = Scheduler(spot_price_function)
-        base_schedule = request.schedule_model
-        if base_schedule is None:
-            base_schedule = ModelSchedule()
-
-        # Schedule new schedule.
-        new_schedules = scheduler.schedule_tasks(
-            request.task_models, base_schedule
-        )
-
-        # Get the recommendation.
-        if len(new_schedules) == 0:
-            recommendation = None
-        else:
-            # TODO: Recommender can be abstracted away as a dependecy on the abstract reommender class as a ctor parameter.
-            lowest_price_recommender = LowestPriceRecommender(spot_price_function)
-            recommendation = Schedule.from_model(
-                lowest_price_recommender.recommend(new_schedules),
-                lowest_price_recommender.highest_scheduled_task_prices
+        with tracer.start_as_current_span("ScheduleTask"):
+            # Get all price points.
+            price_response = self.get_spot_prices.do(
+                GetSpotPricesRequest(datetime.now(tz=timezone.utc), ascending=True)
             )
-        
-        # Construct the response.
-        return ScheduleTasksResponse(
-            tasks=[],
-            schedule=recommendation,
-        )
+            price_points = price_response.price_points
+
+            # Create spot price function.
+            spot_price_function = SpotPriceFunction(price_points)
+
+            # Create scheduler and base schedule.
+            scheduler = Scheduler(spot_price_function)
+            base_schedule = request.schedule_model
+            if base_schedule is None:
+                base_schedule = ModelSchedule()
+
+            # Schedule new schedule.
+            new_schedules = scheduler.schedule_tasks(
+                request.task_models, base_schedule
+            )
+
+            # Get the recommendation.
+            if len(new_schedules) == 0:
+                recommendation = None
+            else:
+                # TODO: Recommender can be abstracted away as a dependecy on the abstract reommender class as a ctor parameter.
+                lowest_price_recommender = LowestPriceRecommender(spot_price_function)
+                recommendation = Schedule.from_model(
+                    lowest_price_recommender.recommend(new_schedules),
+                    lowest_price_recommender.highest_scheduled_task_prices
+                )
+
+            # Construct the response.
+            return ScheduleTasksResponse(
+                tasks=[],
+                schedule=recommendation,
+            )
