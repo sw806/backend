@@ -1,8 +1,7 @@
 from datetime import timedelta
 from typing import List, Optional, Tuple
-from infrastructure.discrete_function import DiscreteFunction
 
-from infrastructure.function import TDomain, TIntegral
+from infrastructure.discrete_function import DiscreteFunction
 
 
 class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedelta, float]]):
@@ -25,10 +24,6 @@ class PowerUsageFunction(DiscreteFunction[timedelta, float, float, Tuple[timedel
 
         self._min_step = min_step
         self.extend_by = extend_by
-
-    @property
-    def min_step(self) -> timedelta:
-        return self._min_step
 
     @property
     def min_domain(self) -> timedelta:

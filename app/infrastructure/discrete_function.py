@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from datetime import timedelta
 from typing import Generic, List, Optional, TypeVar
 from infrastructure.function import Function, TCodomain, TDomain, TIntegral
 
@@ -38,6 +37,21 @@ class DiscreteFunction(
     @abstractmethod
     def domain_order(self, a: TDomain, b: TDomain) -> int:
         pass
+
+    def domain_lt(self, a: TDomain, b: TDomain) -> bool:
+        return self.domain_order(a, b) < 0
+    
+    def domain_gt(self, a: TDomain, b: TDomain) -> bool:
+        return self.domain_order(a, b) > 0
+    
+    def domain_eq(self, a: TDomain, b: TDomain) -> bool:
+        return self.domain_order(a, b) == 0
+
+    def domain_lt_eq(self, a: TDomain, b: TDomain) -> bool:
+        return self.domain_lt(a, b) < 0 and self.domain_eq(a, b)
+    
+    def domain_gt_eq(self, a: TDomain, b: TDomain) -> bool:
+        return self.domain_gt(a, b) > 0 and self.domain_eq(a, b)   
 
     @abstractmethod
     def combine_codomains(self, a: TCodomain, b: TCodomain) -> TCodomain:

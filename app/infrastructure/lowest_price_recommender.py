@@ -2,16 +2,25 @@ from typing import Dict, List
 from .schedule import Schedule
 from .schedules_recommender import SchedulesRecommender
 from .spot_price_function import SpotPriceFunction
+from infrastructure.co2_emission_function import Co2EmissionFunction
 
 from opentelemetry import trace
 tracer = trace.get_tracer(__name__)
+
 class LowestPriceRecommender(SchedulesRecommender[Schedule]):
     highest_scheduled_task_prices: Dict[str, float]
+    highest_scheduled_emission: Dict[str, float]
 
-    def __init__(self, price_function: SpotPriceFunction) -> None:
+    def __init__(
+            self,
+            price_function: SpotPriceFunction,
+            emission_function: Co2EmissionFunction
+        ) -> None:
         super().__init__()
         self.price_function = price_function
+        self.emission_function = emission_function
         self.highest_scheduled_task_prices = {}
+        self.highest_scheduled_emission = {}
 
     def recommend(self, schedules: List[Schedule]) -> Schedule:
         with tracer.start_as_current_span("RecommendLowestPrice"):
@@ -31,5 +40,12 @@ class LowestPriceRecommender(SchedulesRecommender[Schedule]):
                         else:
                             if self.highest_scheduled_task_prices[scheduled_task.task.id] < scheduled_task.cost:
                                 self.highest_scheduled_task_prices[scheduled_task.task.id] = scheduled_task.cost
+
+                        emission = scheduled_task.get_max_emission(self.emission_function)
+                        if scheduled_task.task.id not in self.highest_scheduled_emission:
+                            self.highest_scheduled_emission[scheduled_task.task.id] = emission
+                        else:
+                            if self.highest_scheduled_emission[scheduled_task.task.id] < emission:
+                                self.highest_scheduled_emission[scheduled_task.task.id] = emission
 
             return lowest

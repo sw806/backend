@@ -5,6 +5,7 @@ from typing import List, Optional
 
 from infrastructure.schedule_task import ScheduledTask
 from infrastructure.spot_price_function import SpotPriceFunction
+from infrastructure.co2_emission_function import Co2EmissionFunction
 from infrastructure.task import Task
 
 from opentelemetry import trace
@@ -39,6 +40,12 @@ class Schedule:
             for task in self.tasks:
                 total_price += task.get_max_total_price(price_function)
             return total_price
+
+    def get_total_emission(self, emission_function: Co2EmissionFunction) -> float:
+        total_emission = 0.0
+        for task in self.tasks:
+            total_emission += task.get_max_emission(emission_function)
+        return total_emission
 
     def can_schedule_task_at(self, task: Task, start_time: datetime) -> bool:
         if self.validator is None:
