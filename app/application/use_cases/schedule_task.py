@@ -3,6 +3,8 @@ from infrastructure import OptimalTimeCalculator
 from application.use_cases.get_spot_price_task import GetSpotPricesUseCase, GetSpotPricesRequest, GetSpotPricesResponse
 from pydantic.dataclasses import dataclass
 
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
 
 @dataclass
 class ScheduleTaskRequest:
@@ -23,8 +25,9 @@ class ScheduleTaskUseCase:
         pass
 
     def do(self, request: ScheduleTaskRequest) -> ScheduleTaskResponse:
-        getSpotPricesUseCase = GetSpotPricesUseCase()
-        price_points = getSpotPricesUseCase.do(GetSpotPricesRequest(datetime.now())).price_points
-        optimal_time_calculator = OptimalTimeCalculator()
-        optimal_time = optimal_time_calculator.calculate_optimal_time(price_points, timedelta(seconds=request.duration))
-        return ScheduleTaskResponse(optimal_time)
+        with tracer.start_as_current_span("ScheduleTask"):
+            getSpotPricesUseCase = GetSpotPricesUseCase()
+            price_points = getSpotPricesUseCase.do(GetSpotPricesRequest(datetime.now())).price_points
+            optimal_time_calculator = OptimalTimeCalculator()
+            optimal_time = optimal_time_calculator.calculate_optimal_time(price_points, timedelta(seconds=request.duration))
+            return ScheduleTaskResponse(optimal_time)

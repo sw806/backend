@@ -2,6 +2,9 @@ import os
 import psycopg2
 from typing import Optional
 
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
+
 class CheckStatusRequest:
     def __init__(self) -> None:
         pass
@@ -19,17 +22,18 @@ class CheckStatusUseCase:
         pass
 
     def do(self, _: CheckStatusRequest) -> CheckStatusResponse:
-        connection = psycopg2.connect(
-            host="db",
-            port=5432,
-            user="postgres",
-            password="postgres",
-            database="price-info"
-        )
-        could_connect_to_db = connection.closed == 0
-        connection.close()
-        return CheckStatusResponse(
-            True,
-            could_connect_to_db,
-            os.environ["COMMIT_HASH"]
-        )
+        with tracer.start_as_current_span("CheckDBStatus"):
+            connection = psycopg2.connect(
+                host="db",
+                port=5432,
+                user="postgres",
+                password="postgres",
+                database="price-info"
+            )
+            could_connect_to_db = connection.closed == 0
+            connection.close()
+            return CheckStatusResponse(
+                True,
+                could_connect_to_db,
+                os.environ["COMMIT_HASH"]
+            )

@@ -22,7 +22,7 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
         for scheduled_task in tasks:
             # Either the ext point for the task is that it is starting or that it has been running.
             runtime = time - scheduled_task.start_interval.start
-            
+
             # Either the task has not started yet and the enxt point is its start or it ccontinues from runtime.
             if runtime < timedelta():
                 next_datetime = scheduled_task.start_interval.start
@@ -66,7 +66,7 @@ class MaximumPowerConsumptionValidator(ScheduleValidator):
             # Get power consumption at the current time.
             established_consumption = self.power_consumption_at(schedule.tasks, current_time)
             total_consumption = established_consumption + task_consumption
-            
+
             # Check if we exceed the limit.
             if total_consumption > self.maximum_consumption:
                 return False

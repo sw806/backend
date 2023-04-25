@@ -6,6 +6,11 @@ from presentation import (
     spot_prices_router_v1, emissions_router_v1
 )
 
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+
+trace.set_tracer_provider(TracerProvider())
+
 fastApi = FastAPI()
 fastApi.include_router(schedules_router_v1)
 fastApi.include_router(schedules_router_v2)

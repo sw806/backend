@@ -60,7 +60,7 @@ class ScheduledTask:
     def get_max_emission(self, emission_function: Co2EmissionFunction) -> float:
         if self.start_interval.start < emission_function.min_domain:
             return 0
-        
+
         if self.start_interval.start + self.task.duration > emission_function.max_domain:
             return 0
 
@@ -85,14 +85,14 @@ class ScheduledTask:
 
             if current_emission > greatest_emission:
                 greatest_emission = current_emission
-        
+
         return greatest_emission
 
     def get_max_total_price(self, price_function: SpotPriceFunction) -> float:
         power_price_function = PowerPriceFunction(
             self.task.power_usage_function, price_function
         )
-        
+
         greatest_price = power_price_function.integrate_from_to(
             self.start_interval.start, self.task.duration
         )
@@ -103,7 +103,7 @@ class ScheduledTask:
         for current_runtime in runtime_iterator:
             if current_runtime > self.start_interval.duration:
                 break
-            
+
             current_price = power_price_function.integrate_from_to(
                 self.start_interval.start + current_runtime, self.task.duration
             )
