@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from infrastructure.co2_emission_point import Co2EmissionPoint
 from infrastructure.eds_requests import PricePoint
 import psycopg2
@@ -14,6 +15,7 @@ class PostgresDatabase:
             password="postgres",
             database="price-info",
         )
+
         self.cursor = self.conn.cursor()
 
     def get_prices(self, start_time: datetime, ascending: bool = False) -> List[PricePoint]:
