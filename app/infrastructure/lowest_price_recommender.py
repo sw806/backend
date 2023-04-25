@@ -37,18 +37,8 @@ class LowestPriceRecommender(SchedulesRecommender[Schedule]):
                         # Or we have an existing price and wont to check if this one is worse.
                         if scheduled_task.task.id not in self.highest_scheduled_task_prices:
                             self.highest_scheduled_task_prices[scheduled_task.task.id] = scheduled_task.cost
-<<<<<<< HEAD
-=======
                         else:
                             if self.highest_scheduled_task_prices[scheduled_task.task.id] < scheduled_task.cost:
                                 self.highest_scheduled_task_prices[scheduled_task.task.id] = scheduled_task.cost
-
-                        emission = scheduled_task.get_max_emission(self.emission_function)
-                        if scheduled_task.task.id not in self.highest_scheduled_emission:
-                            self.highest_scheduled_emission[scheduled_task.task.id] = emission
-                        else:
-                            if self.highest_scheduled_emission[scheduled_task.task.id] < emission:
-                                self.highest_scheduled_emission[scheduled_task.task.id] = emission
->>>>>>> c8cb966333a6b00a8a7e228095d66ebda194f9c7
 
             return lowest
