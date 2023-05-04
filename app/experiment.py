@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import sys
-from typing import List
+from typing import Dict, List, Tuple
 
 from infrastructure.eletricity_prices import PricePoint
 from infrastructure.eds_requests import EdsRequests
@@ -63,14 +63,16 @@ def get_available_price_points_from(start: datetime, include_dayahead: bool = Fa
 class Result:
     def __init__(
         self,
-        min: float, min_time: datetime,
-        max: float, max_time: datetime,
-        avg: float) -> None:
-        self.min = min
+        scheduler_time: datetime,
+        min_price: float, min_time: datetime,
+        max_price: float, max_time: datetime,
+        avg_price: float) -> None:
+        self.start = scheduler_time
+        self.min = min_price
         self.min_time = min_time
-        self.max = max
+        self.max = max_price
         self.max_time = max_time
-        self.avg = avg
+        self.avg = avg_price
 
 def analyse_at_time(start: datetime, task: Task, include_dayahead: bool = False) -> Result:
     price_points = get_available_price_points_from(start, include_dayahead)
@@ -79,23 +81,22 @@ def analyse_at_time(start: datetime, task: Task, include_dayahead: bool = False)
     scheduler = Scheduler(price_function)
     schedules = scheduler.schedule_tasks([task])
 
-    min = sys.float_info.max
+    min_price = sys.float_info.max
     min_time = datetime.now(tz=timezone.utc)
-    max = sys.float_info.min
+    max_price = sys.float_info.min
     max_time = datetime.now(tz=timezone.utc)
-    total = 0
+    total_price = 0
 
     for schedule in schedules:
         price = schedule.get_total_price(price_function)
 
-        if price < min: min = price
-        if price > max: max = price
-        total += price
-        
+        if price < min_price: min_price = price
+        if price > max_price: max_price = price
+        total_price += price
 
-    avg = total / len(schedules)
+    avg = total_price / len(schedules)
 
-    return Result(min, min_time, max, max_time, avg)
+    return Result(start, min_price, min_time, max_price, max_time, avg)
 
 def create_constant_power_task(duration: timedelta, power: float) -> Task:
     power_factory = PowerUsageFunctionFactory()
@@ -128,10 +129,19 @@ def get_results(step: timedelta, duration: timedelta) -> List[Result]:
     return results
 
 class AggregatedResults():
-    def __init__(self, duration: timedelta, avg_min_max_saving: float, avg_min_avg_saving: float) -> None:
+    def __init__(
+            self,
+            duration: timedelta,
+            avg_min_max_saving: float,
+            avg_min_avg_saving: float,
+            min_max_and_min_avg_saving_per_time: Dict[datetime, Tuple[float, float]],
+            results_per_time: Dict[timedelta, List[Result]]
+        ) -> None:
         self.duration = duration
         self.avg_min_max_saving = avg_min_max_saving
         self.avg_min_avg_saving = avg_min_avg_saving
+        self.min_max_and_min_avg_saving_per_time = min_max_and_min_avg_saving_per_time
+        self.results_per_time = results_per_time
 
 def compute_aggregate_result(duration: timedelta) -> AggregatedResults:
     results = get_results(
@@ -141,16 +151,43 @@ def compute_aggregate_result(duration: timedelta) -> AggregatedResults:
     total_min_max_saving = 0
     total_min_avg_saving = 0
 
+    results_per_time: Dict[timedelta, List[Result]] = {}
+
     for result in results:
         total_min_max_saving += result.max - result.min
         total_min_avg_saving += result.avg - result.min
 
+        time_into_day: timedelta = result.start - result.start.replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+
+        if time_into_day not in results_per_time:
+            results_per_time[time_into_day] = [result]
+
+    min_max_and_min_avg_saving_per_time: Dict[timedelta, Tuple[float, float]] = {}
+    for time in results_per_time:
+        results = results_per_time[time]
+
+        avg_min_max_saving = 0
+        avg_min_avg_saving = 0
+
+        for (idx, result) in enumerate(results):
+            min_max_saving = result.max - result.min
+            avg_min_max_saving = (avg_min_max_saving * idx + min_max_saving) / (idx + 1)
+
+            min_avg_saving = result.avg - result.min
+            avg_min_avg_saving = (avg_min_avg_saving * idx + min_avg_saving) / (idx + 1)
+
+        min_max_and_min_avg_saving_per_time[time] = (avg_min_max_saving, avg_min_avg_saving)
+
     avg_min_max_saving = total_min_max_saving / len(results)
     avg_min_avg_saving = total_min_avg_saving / len(results)
 
-    return AggregatedResults(duration, avg_min_max_saving, avg_min_avg_saving)
+    return AggregatedResults(
+        duration, avg_min_max_saving, avg_min_avg_saving, min_max_and_min_avg_saving_per_time, results_per_time
+    )
 
-duration = timedelta(minutes=15)
+duration = timedelta(hours=1)
 duration_step = timedelta(minutes=15)
 
 while duration <= timedelta(hours=10):
@@ -160,5 +197,9 @@ while duration <= timedelta(hours=10):
     print(f'Savings from a task with duration of: {aggregated_result.duration}')
     print(f'avg_min_max_saving: {aggregated_result.avg_min_max_saving}')
     print(f'avg_min_avg_saving: {aggregated_result.avg_min_avg_saving}')
+
+    for time in aggregated_result.min_max_and_min_avg_saving_per_time:
+        (avg_min_max_savings, avg_min_avg_savings) = aggregated_result.min_max_and_min_avg_saving_per_time[time]
+        print(f'Time:{time}, avg_min_max_savings:{avg_min_max_savings}, avg_min_avg_savings:{avg_min_avg_savings}')
 
     duration += duration_step

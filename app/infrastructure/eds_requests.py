@@ -123,7 +123,10 @@ class EdsRequests(ElectricityPrices, CO2EmissionsRepository):
 
                 try:
                     # Convert from DKK per MWh to DKK per KWh
+                    asd = float(record['SpotPriceDKK'])
+                    print(f'BEFORE :: EDS price at {time} is {asd}')
                     price: float = float(record['SpotPriceDKK']) / 1000
+                    print(f'AFTER :: EDS price at {time} is {price}')
                 except KeyError as exc:
                     raise KeyError("Missing 'SpotPriceDKK' in price point record", record) from exc
                 except ValueError as exc:

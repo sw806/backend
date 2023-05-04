@@ -245,6 +245,9 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
                 )
                 price_points = price_response.price_points
 
+                for price_point in price_points:
+                    print(f'Price at {price_point.time} is {price_point.price}')
+
             with tracer.start_as_current_span("GetEmissionPoints"):
                 # Get all emission points.
                 emission_response = self.get_emission_points.do(
