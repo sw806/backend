@@ -26,6 +26,8 @@ from infrastructure import (
 )
 from infrastructure.co2_emission_function import Co2EmissionFunction
 
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
 
 @dataclass
 class DatetimeInterval:
@@ -230,57 +232,66 @@ class ScheduleTasksUseCase(UseCase[ScheduleTasksRequest, ScheduleTasksResponse])
         get_spot_prices: UseCase[GetSpotPricesRequest, GetSpotPricesResponse],
         get_emission_points: UseCase[GetCarbonEmissionIntensityRequest, GetCarbonEmissionIntensityResponse]
     ) -> None:
-        self.get_spot_prices = get_spot_prices
-        self.get_emission_points = get_emission_points
+        with tracer.start_as_current_span("InitScheduleTasksUseCase"):
+            self.get_spot_prices = get_spot_prices
+            self.get_emission_points = get_emission_points
 
     def do(self, request: ScheduleTasksRequest) -> ScheduleTasksResponse:
-        # Get all price points.
-        price_response = self.get_spot_prices.do(
-            GetSpotPricesRequest(datetime.now(tz=timezone.utc), ascending=True)
-        )
-        price_points = price_response.price_points
+        with tracer.start_as_current_span("ScheduleTask"):
+            with tracer.start_as_current_span("GetSportPrices"):
+                # Get all price points.
+                price_response = self.get_spot_prices.do(
+                    GetSpotPricesRequest(datetime.now(tz=timezone.utc), ascending=True)
+                )
+                price_points = price_response.price_points
 
-        # Get all emission points.
-        emission_response = self.get_emission_points.do(
-            GetCarbonEmissionIntensityRequest(datetime.now(tz=timezone.utc), ascending=True)
-        )
-        emission_points: List[Co2EmissionPoint] = emission_response.emission_points
+            with tracer.start_as_current_span("GetEmissionPoints"):
+                # Get all emission points.
+                emission_response = self.get_emission_points.do(
+                    GetCarbonEmissionIntensityRequest(datetime.now(tz=timezone.utc), ascending=True)
+                )
+                emission_points: List[Co2EmissionPoint] = emission_response.emission_points
 
-        # Create spot price function.
-        spot_price_function = SpotPriceFunction(price_points)
-        print(f'spot_price_function, min: {spot_price_function.min_domain} max: {spot_price_function.max_domain}')
+            with tracer.start_as_current_span("CreateSportPriceFunction"):
+                # Create spot price function.
+                spot_price_function = SpotPriceFunction(price_points)
+                print(f'spot_price_function, min: {spot_price_function.min_domain} max: {spot_price_function.max_domain}')
 
-        # Create emission function
-        emission_function = Co2EmissionFunction(emission_points)
-        print(f'emission_function, min: {emission_function.min_domain} max: {emission_function.max_domain}')
+            with tracer.start_as_current_span("CreateEmissionFunction"):
+                # Create emission function
+                emission_function = Co2EmissionFunction(emission_points)
+                print(f'emission_function, min: {emission_function.min_domain} max: {emission_function.max_domain}')
 
-        # Create scheduler and base schedule.
-        scheduler = Scheduler(spot_price_function)
-        base_schedule = request.schedule_model
-        if base_schedule is None:
-            base_schedule = ModelSchedule()
+            with tracer.start_as_current_span("CreateScheduler"):
+                # Create scheduler and base schedule.
+                scheduler = Scheduler(spot_price_function)
+                base_schedule = request.schedule_model
+                if base_schedule is None:
+                    base_schedule = ModelSchedule()
 
-        # Schedule new schedule.
-        new_schedules = scheduler.schedule_tasks(
-            request.task_models, base_schedule
-        )
+            with tracer.start_as_current_span("ScheduleNewScheduler"):
+                # Schedule new schedule.
+                new_schedules = scheduler.schedule_tasks(
+                    request.task_models, base_schedule
+                )
 
-        # Get the recommendation.
-        if len(new_schedules) == 0:
-            recommendation = None
-        else:
-            # TODO: Recommender can be abstracted away as a dependecy on the abstract reommender class as a ctor parameter.
-            lowest_price_recommender = LowestPriceRecommender(spot_price_function, emission_function)
-            print(lowest_price_recommender.highest_scheduled_task_prices)
-            recommendation = Schedule.from_model(
-                lowest_price_recommender.recommend(new_schedules),
-                lowest_price_recommender.highest_scheduled_task_prices,
-                emission_function,
-                lowest_price_recommender.highest_scheduled_emission
+            with tracer.start_as_current_span("GetRecommendation"):
+                # Get the recommendation.
+                if len(new_schedules) == 0:
+                    recommendation = None
+                else:
+                    # TODO: Recommender can be abstracted away as a dependecy on the abstract reommender class as a ctor parameter.
+                    lowest_price_recommender = LowestPriceRecommender(spot_price_function, emission_function)
+                    print(lowest_price_recommender.highest_scheduled_task_prices)
+                    recommendation = Schedule.from_model(
+                        lowest_price_recommender.recommend(new_schedules),
+                        lowest_price_recommender.highest_scheduled_task_prices,
+                        emission_function,
+                        lowest_price_recommender.highest_scheduled_emission
+                    )
+
+            # Construct the response.
+            return ScheduleTasksResponse(
+                tasks=[],
+                schedule=recommendation,
             )
-        
-        # Construct the response.
-        return ScheduleTasksResponse(
-            tasks=[],
-            schedule=recommendation,
-        )

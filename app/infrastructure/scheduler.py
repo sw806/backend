@@ -9,6 +9,8 @@ from infrastructure.task import Task
 from infrastructure.spot_price_function import SpotPriceFunction
 from infrastructure.power_price_function import PowerPriceFunction
 
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
 
 class Scheduler:
     def __init__(
@@ -56,39 +58,40 @@ class Scheduler:
         task: Task,
         schedule: Optional[Schedule] = None
     ) -> List[DatetimeInterval]:
-        if schedule is None:
-            schedule = Schedule()
+        with tracer.start_as_current_span("get_all_possible_extrapolated_start_times"):
+            if schedule is None:
+                schedule = Schedule()
 
-        intervals: List[DatetimeInterval] = []
-        all_start_points = self.get_all_possible_start_times(task, schedule)
+            intervals: List[DatetimeInterval] = []
+            all_start_points = self.get_all_possible_start_times(task, schedule)
 
-        # Make sure that the times are sorted in ascending order.
-        all_start_points.sort(reverse=False)
+            # Make sure that the times are sorted in ascending order.
+            all_start_points.sort(reverse=False)
 
-        if len(all_start_points) == 0:
-            return []
+            if len(all_start_points) == 0:
+                return []
 
-        for start_time in all_start_points:
-            if not schedule.can_schedule_task_at(task, start_time):
-                continue
-
-            # Go through all succeeding starting points
-            # And for each of these points we assume we can extend to
-            # and when we encounter the first we cant extend to then we stop extending.
-            for end_time in all_start_points:
-                if end_time < start_time:
+            for start_time in all_start_points:
+                if not schedule.can_schedule_task_at(task, start_time):
                     continue
 
-                scheduleable = schedule.can_schedule_task_at(task, end_time)
+                # Go through all succeeding starting points
+                # And for each of these points we assume we can extend to
+                # and when we encounter the first we cant extend to then we stop extending.
+                for end_time in all_start_points:
+                    if end_time < start_time:
+                        continue
 
-                if scheduleable:
-                    interval = DatetimeInterval(start_time, end_time - start_time)
+                    scheduleable = schedule.can_schedule_task_at(task, end_time)
 
-                    intervals.append(interval)
-                else:
-                    break
+                    if scheduleable:
+                        interval = DatetimeInterval(start_time, end_time - start_time)
 
-        return intervals
+                        intervals.append(interval)
+                    else:
+                        break
+
+            return intervals
 
     def schedule_task_for(
         self,
@@ -108,7 +111,7 @@ class Scheduler:
                 task.power_usage_function, self.price_function
             )
             scheduled_task = ScheduledTask(
-                DatetimeInterval(start_time, timedelta()), 
+                DatetimeInterval(start_time, timedelta()),
                 task,
                 power_price_function.integrate_from_to(start_time, task.duration)
             )
@@ -138,14 +141,14 @@ class Scheduler:
                 extended_schedules = self.schedule_task_for(task, schedule)
                 for extended_schedule in extended_schedules:
                     new_schedules.append(extended_schedule)
-            
+
             # We were unable to schedule any tasks to any of the current schedules.
             # This means that the schedule + seed_task disallows any of the tasks to be added.
             # Otherwise, we advance to n' = n + 1 by setting the schedules to the new ones.
             if len(new_schedules) == 0:
                 return []
             else: schedules = new_schedules
-        
+
         return schedules
 
     def schedule_tasks(
@@ -153,8 +156,9 @@ class Scheduler:
         tasks: List[Task],
         schedule: Schedule = Schedule()
     ) -> List[Schedule]:
-        schedules: List[Schedule] = []
-        for seed_task in tasks:
-            for schedule in self.schedule_tasks_starting_with(seed_task, tasks, schedule):
-                schedules.append(schedule)
-        return schedules
+        with tracer.start_as_current_span("schedule_tasks"):
+            schedules: List[Schedule] = []
+            for seed_task in tasks:
+                for schedule in self.schedule_tasks_starting_with(seed_task, tasks, schedule):
+                    schedules.append(schedule)
+            return schedules

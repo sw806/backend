@@ -1,20 +1,25 @@
 from typing import List, Optional
+
 from infrastructure.co2_emission_point import Co2EmissionPoint
 from infrastructure.eds_requests import PricePoint
 import psycopg2
 from psycopg2 import extras
 from datetime import datetime
 
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
+
 class PostgresDatabase:
     def __init__(self, host: str="db") -> None:
-        self.conn = psycopg2.connect(
-            host=host,
-            port=5432,
-            user="postgres",
-            password="postgres",
-            database="price-info",
-        )
-        self.cursor = self.conn.cursor()
+        with tracer.start_as_current_span("InitDB"):
+            self.conn = psycopg2.connect(
+                host=host,
+                port=5432,
+                user="postgres",
+                password="postgres",
+                database="price-info",
+            )
+            self.cursor = self.conn.cursor()
 
     def get_prices(self, start_time: datetime, ascending: bool = False) -> List[PricePoint]:
         query = f"SELECT * FROM pricepoint WHERE _time >= '{start_time.isoformat()}'"

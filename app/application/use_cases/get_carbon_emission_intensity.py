@@ -46,7 +46,8 @@ class GetCarbonEmissionIntensityUseCase(UseCase[GetCarbonEmissionIntensityReques
                 day=latest_available_emission.day + 1,
                 hour=11, # It is not 23 because we work with utc
                 minute=0,
-                second=0
+                second=0,
+                microsecond=0,
             )
         else:
             # The spot prices have NOT been released yet.
@@ -54,7 +55,8 @@ class GetCarbonEmissionIntensityUseCase(UseCase[GetCarbonEmissionIntensityReques
                 day=latest_available_emission.day,
                 hour=22,
                 minute=0,
-                second=0
+                second=0,
+                microsecond=0,
             )
         
         print(f'Get emissions with latest {latest_available_emission} for {request.start_time}')

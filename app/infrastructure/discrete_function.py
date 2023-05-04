@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Generic, List, Optional, TypeVar
 from infrastructure.function import Function, TCodomain, TDomain, TIntegral
 
-
 TDiscretePoint = TypeVar("TDiscretePoint")
 class DiscreteFunction(
     Function[TDomain, TCodomain, TIntegral],
@@ -166,7 +165,7 @@ class DiscreteFunction(
         if self.is_in_same_discrete_point(min, start, end, max) or \
             not next_to_first_point is None and end == self.get_domain(next_to_first_point):
             return self.integral_over(
-                min, start, 
+                min, start,
                 max, end
             )
 
