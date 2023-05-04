@@ -46,11 +46,11 @@ class GetSpotPricesUseCase(UseCase[GetSpotPricesRequest, GetSpotPricesResponse])
         if latest_available_spot_price.hour > 11:
             # The spot prices have already been released so the next release is tomorrow.
             latest_available_spot_price = latest_available_spot_price.replace(
-                day=latest_available_spot_price.day + 1,
+                day=latest_available_spot_price.day,
                 hour=21, # It is not 23 because we work with utc
                 minute=0,
                 second=0
-            )
+            ) + timedelta(days=1)
         else:
             # The spot prices have NOT been released yet.
             latest_available_spot_price = latest_available_spot_price.replace(

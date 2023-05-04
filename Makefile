@@ -24,4 +24,7 @@ test: db
 	docker compose -f docker-compose.yml -f test.docker-compose.yml up --exit-code-from backend
 	docker compose down -v
 
+experiment: FORCE
+	cd ./app/; python3 ./experiment.py
+
 FORCE: ;
