@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import sys
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from infrastructure.eletricity_prices import PricePoint
 from infrastructure.eds_requests import EdsRequests
@@ -22,33 +22,41 @@ print(f'Latest price point: {price_points[-1].time}')
 #     if price_point.price < 0:
 #         print(f'Found a negative price :: {price_point.price} at {price_point.time}')
 
-def get_available_price_points_from(start: datetime, include_dayahead: bool = False) -> List[PricePoint]:
+print("Prices")
+print(f'Date, Price (dkk/kWh)')
+for price_point in price_points:
+    print(f'{price_point.time}, {price_point.price}')
+print("")
+
+def get_available_price_points_from(start: datetime, include_dayahead: bool = False, end: Optional[datetime] = None) -> List[PricePoint]:
     assert start <= price_points[-1].time
 
     last_available_spot_price_time = datetime(
         start.year, start.month, start.day, start.hour, 0, 0, 0, tzinfo=timezone.utc
     )
-    if include_dayahead:
-        if last_available_spot_price_time.hour > 11:
-            # The spot prices have already been released so the next release is tomorrow.
-            last_available_spot_price_time = last_available_spot_price_time.replace(
-                day=last_available_spot_price_time.day,
-                hour=21, # It is not 23 because we work with utc
-                minute=0,
-                second=0
-            ) + timedelta(days=1)
+    if end is None:
+        if include_dayahead:
+            if last_available_spot_price_time.hour > 11:
+                # The spot prices have already been released so the next release is tomorrow.
+                last_available_spot_price_time = last_available_spot_price_time.replace(
+                    day=last_available_spot_price_time.day,
+                    hour=21, # It is not 23 because we work with utc
+                    minute=0,
+                    second=0
+                ) + timedelta(days=1)
+            else:
+                # The spot prices have NOT been released yet.
+                last_available_spot_price_time = last_available_spot_price_time.replace(
+                    day=last_available_spot_price_time.day,
+                    hour=22,
+                    minute=0,
+                    second=0
+                )
         else:
-            # The spot prices have NOT been released yet.
             last_available_spot_price_time = last_available_spot_price_time.replace(
-                day=last_available_spot_price_time.day,
-                hour=22,
-                minute=0,
-                second=0
+                hour=22
             )
-    else:
-        last_available_spot_price_time = last_available_spot_price_time.replace(
-            hour=22
-        )
+    else: last_available_spot_price_time = end
     
     assert start < last_available_spot_price_time
     assert last_available_spot_price_time <= price_points[-1].time
@@ -67,15 +75,15 @@ class Result:
         min_price: float, min_time: datetime,
         max_price: float, max_time: datetime,
         avg_price: float) -> None:
-        self.start = scheduler_time
-        self.min = min_price
+        self.scheduler_time = scheduler_time
+        self.min_price = min_price
         self.min_time = min_time
-        self.max = max_price
+        self.max_price = max_price
         self.max_time = max_time
-        self.avg = avg_price
+        self.avg_price = avg_price
 
-def analyse_at_time(start: datetime, task: Task, include_dayahead: bool = False) -> Result:
-    price_points = get_available_price_points_from(start, include_dayahead)
+def analyse_at_time(start: datetime, task: Task, include_dayahead: bool = False, end: Optional[datetime] = None) -> Result:
+    price_points = get_available_price_points_from(start, include_dayahead, end)
     price_function = SpotPriceFunction(price_points)
 
     scheduler = Scheduler(price_function)
@@ -88,10 +96,15 @@ def analyse_at_time(start: datetime, task: Task, include_dayahead: bool = False)
     total_price = 0
 
     for schedule in schedules:
+        assert len(schedule.tasks) == 1
         price = schedule.get_total_price(price_function)
 
-        if price < min_price: min_price = price
-        if price > max_price: max_price = price
+        if price < min_price: 
+            min_price = price
+            min_time = schedule.tasks[0].start_interval.start
+        if price > max_price: 
+            max_price = price
+            max_time = schedule.tasks[0].end_interval.start
         total_price += price
 
     avg = total_price / len(schedules)
@@ -154,52 +167,89 @@ def compute_aggregate_result(duration: timedelta) -> AggregatedResults:
     results_per_time: Dict[timedelta, List[Result]] = {}
 
     for result in results:
-        total_min_max_saving += result.max - result.min
-        total_min_avg_saving += result.avg - result.min
+        total_min_max_saving += result.max_price - result.min_price
+        total_min_avg_saving += result.avg_price - result.min_price
 
-        time_into_day: timedelta = result.start - result.start.replace(
+        time_into_day: timedelta = result.scheduler_time - result.scheduler_time.replace(
             hour=0, minute=0, second=0, microsecond=0
         )
 
         if time_into_day not in results_per_time:
             results_per_time[time_into_day] = [result]
 
+    avg_min_max_saving = total_min_max_saving / len(results)
+    avg_min_avg_saving = total_min_avg_saving / len(results)
+
     min_max_and_min_avg_saving_per_time: Dict[timedelta, Tuple[float, float]] = {}
     for time in results_per_time:
-        results = results_per_time[time]
+        time_results = results_per_time[time]
 
         avg_min_max_saving = 0
         avg_min_avg_saving = 0
 
-        for (idx, result) in enumerate(results):
-            min_max_saving = result.max - result.min
+        for (idx, result) in enumerate(time_results):
+            min_max_saving = result.max_price - result.min_price
             avg_min_max_saving = (avg_min_max_saving * idx + min_max_saving) / (idx + 1)
 
-            min_avg_saving = result.avg - result.min
+            min_avg_saving = result.avg_price - result.min_price
             avg_min_avg_saving = (avg_min_avg_saving * idx + min_avg_saving) / (idx + 1)
 
         min_max_and_min_avg_saving_per_time[time] = (avg_min_max_saving, avg_min_avg_saving)
-
-    avg_min_max_saving = total_min_max_saving / len(results)
-    avg_min_avg_saving = total_min_avg_saving / len(results)
 
     return AggregatedResults(
         duration, avg_min_max_saving, avg_min_avg_saving, min_max_and_min_avg_saving_per_time, results_per_time
     )
 
-duration = timedelta(hours=1)
+duration = timedelta(minutes=15)
 duration_step = timedelta(minutes=15)
 
-while duration <= timedelta(hours=10):
+while duration <= timedelta(hours=6):
     aggregated_result = compute_aggregate_result(duration)
+    task = create_constant_power_task(duration, 1)
 
     print('')
-    print(f'Savings from a task with duration of: {aggregated_result.duration}')
+    print(f'Task with duration of: {aggregated_result.duration}')
+    print('')
+    print('Test the amount of savings by scheduling action time')
     print(f'avg_min_max_saving: {aggregated_result.avg_min_max_saving}')
     print(f'avg_min_avg_saving: {aggregated_result.avg_min_avg_saving}')
 
+    print('Time, avg_min_max_savings, avg_min_avg_savings')
     for time in aggregated_result.min_max_and_min_avg_saving_per_time:
         (avg_min_max_savings, avg_min_avg_savings) = aggregated_result.min_max_and_min_avg_saving_per_time[time]
-        print(f'Time:{time}, avg_min_max_savings:{avg_min_max_savings}, avg_min_avg_savings:{avg_min_avg_savings}')
+        print(f'{time}, {avg_min_max_savings}, {avg_min_avg_savings}')
+
+    print('')
+
+    print('Test the cost of running appliances in "sleep", "work", "off"')
+
+    initial_start = datetime(2023, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc)
+    initial_end = datetime(2023, 4, 30, 13, 0, 0, 0, tzinfo=timezone.utc)
+    current = initial_start
+    
+    print('The cost of running it either when sleeping, working, or off')
+    print(', Sleep (0-8),,,,, Work (8-16),,,,, Off (16-24)')
+    print('Time, min price (dkk), min time, max price (dkk), max time, avg price, min price (dkk), min time, max price (dkk), max time, avg price, min price (dkk), min time, max price (dkk), max time, avg price')
+    while current < initial_end:
+        # Sleep 24-8
+        sleep_start = current.replace(hour=0)
+        sleep_end = current.replace(hour=7)
+        sleep_result: Result = analyse_at_time(sleep_start, task, end=sleep_end)
+
+        # Work 8-16
+        work_start = current.replace(hour=8)
+        work_end = current.replace(hour=15)
+        work_result: Result = analyse_at_time(work_start, task, end=work_end)
+
+        # Off 16-24
+        off_start = current.replace(hour=16)
+        off_end = current.replace(hour=23)
+        off_result: Result = analyse_at_time(off_start, task, end=off_end)
+
+        print(f'{current}, {sleep_result.min_price}, {sleep_result.min_time}, {sleep_result.max_price}, {sleep_result.max_time}, {sleep_result.avg_price}, {work_result.min_price}, {work_result.min_time}, {work_result.max_price}, {work_result.max_time}, {work_result.avg_price}, {off_result.min_price}, {off_result.min_time}, {off_result.max_price}, {off_result.max_time}, {off_result.avg_price}')
+
+        current += timedelta(days=1)
+
+    print('')
 
     duration += duration_step
