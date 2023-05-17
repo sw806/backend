@@ -93,7 +93,7 @@ def analyse_at_time(start: datetime, task: Task, include_dayahead: bool = False,
     min_time = datetime.now(tz=timezone.utc)
     max_price = sys.float_info.min
     max_time = datetime.now(tz=timezone.utc)
-    total_price = 0
+    total_price = 0.0
 
     for schedule in schedules:
         assert len(schedule.tasks) == 1
@@ -147,7 +147,7 @@ class AggregatedResults():
             duration: timedelta,
             avg_min_max_saving: float,
             avg_min_avg_saving: float,
-            min_max_and_min_avg_saving_per_time: Dict[datetime, Tuple[float, float]],
+            min_max_and_min_avg_saving_per_time: Dict[timedelta, Tuple[float, float]],
             results_per_time: Dict[timedelta, List[Result]]
         ) -> None:
         self.duration = duration
@@ -161,8 +161,8 @@ def compute_aggregate_result(duration: timedelta) -> AggregatedResults:
         step=timedelta(hours=1),
         duration=duration
     )
-    total_min_max_saving = 0
-    total_min_avg_saving = 0
+    total_min_max_saving = 0.0
+    total_min_avg_saving = 0.0
 
     results_per_time: Dict[timedelta, List[Result]] = {}
 
@@ -184,8 +184,8 @@ def compute_aggregate_result(duration: timedelta) -> AggregatedResults:
     for time in results_per_time:
         time_results = results_per_time[time]
 
-        avg_min_max_saving = 0
-        avg_min_avg_saving = 0
+        avg_min_max_saving = 0.0
+        avg_min_avg_saving = 0.0
 
         for (idx, result) in enumerate(time_results):
             min_max_saving = result.max_price - result.min_price
