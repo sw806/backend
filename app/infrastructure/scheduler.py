@@ -1,5 +1,6 @@
 from __future__ import annotations
 from datetime import datetime, timedelta
+import itertools
 from typing import List, Optional
 
 from infrastructure.datetime_interval import DatetimeInterval
@@ -123,42 +124,27 @@ class Scheduler:
             schedules.append(new_schedule)
 
         return schedules
-    
-    def schedule_tasks_starting_with(
-        self,
-        seed_task: Task,
-        tasks: List[Task] = [],
-        base_schedule: Schedule = Schedule()
-    ) -> List[Schedule]:
-        schedules: List[Schedule] = self.schedule_task_for(seed_task, base_schedule)
-
-        # n' = n0 + 1 tasks in schedules
-        for task in tasks:
-            if task is seed_task: continue
-
-            new_schedules: List[Schedule] = []
-            for schedule in schedules:
-                extended_schedules = self.schedule_task_for(task, schedule)
-                for extended_schedule in extended_schedules:
-                    new_schedules.append(extended_schedule)
-
-            # We were unable to schedule any tasks to any of the current schedules.
-            # This means that the schedule + seed_task disallows any of the tasks to be added.
-            # Otherwise, we advance to n' = n + 1 by setting the schedules to the new ones.
-            if len(new_schedules) == 0:
-                return []
-            else: schedules = new_schedules
-
-        return schedules
 
     def schedule_tasks(
         self,
         tasks: List[Task],
-        schedule: Schedule = Schedule()
+        s0: Schedule = Schedule()
     ) -> List[Schedule]:
-        with tracer.start_as_current_span("schedule_tasks"):
-            schedules: List[Schedule] = []
-            for seed_task in tasks:
-                for schedule in self.schedule_tasks_starting_with(seed_task, tasks, schedule):
-                    schedules.append(schedule)
-            return schedules
+        S = []
+        for Tp in itertools.permutations(tasks):
+            Sp = [s0]
+
+            for t in Tp:
+                new_schedules = []
+
+                for next_schedule in Sp:
+                    for a in self.schedule_task_for(t, next_schedule.copy()):
+                        new_schedules.append(a)
+                
+                Sp = new_schedules
+
+            for next_schedule in new_schedules:
+                S.append(next_schedule)
+                    
+        return S
+    

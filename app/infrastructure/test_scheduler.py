@@ -369,3 +369,28 @@ class TestScheduler:
         # Assert
         assert datetime(2021, 1, 1, 15, 45) in start_points
         assert valid
+
+    def test_len_schedules_from_scheduler(self):
+        # Arrange
+        price_points: List[PricePoint] = [
+            PricePoint(datetime(2021, 1, 1, 15), 1)
+        ]
+        spot_price_function = SpotPriceFunction(price_points)
+        scheduler = Scheduler(
+            SpotPriceFunction(price_points)
+        )
+
+        power_function_1 = PowerUsageFunctionFactory().create_constant_consumption(timedelta(minutes=60), 1)
+        task_1 = Task(power_function_1, id="1")
+
+        power_function_2 = PowerUsageFunctionFactory().create_constant_consumption(timedelta(minutes=60), 1)
+        task_2 = Task(power_function_2, id="2")
+
+        power_function_3 = PowerUsageFunctionFactory().create_constant_consumption(timedelta(minutes=60), 1)
+        task_3 = Task(power_function_3, id="3")
+
+        # Act
+        schedules = scheduler.schedule_tasks([task_1, task_2, task_3])
+
+        # Assert
+        assert len(schedules) == 6

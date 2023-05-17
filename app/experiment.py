@@ -205,7 +205,7 @@ duration_step = timedelta(minutes=15)
 
 while duration <= timedelta(hours=6):
     aggregated_result = compute_aggregate_result(duration)
-    task = create_constant_power_task(duration, 1)
+    t = create_constant_power_task(duration, 1)
 
     print('')
     print(f'Task with duration of: {aggregated_result.duration}')
@@ -234,17 +234,17 @@ while duration <= timedelta(hours=6):
         # Sleep 24-8
         sleep_start = current.replace(hour=0)
         sleep_end = current.replace(hour=7)
-        sleep_result: Result = analyse_at_time(sleep_start, task, end=sleep_end)
+        sleep_result: Result = analyse_at_time(sleep_start, t, end=sleep_end)
 
         # Work 8-16
         work_start = current.replace(hour=8)
         work_end = current.replace(hour=15)
-        work_result: Result = analyse_at_time(work_start, task, end=work_end)
+        work_result: Result = analyse_at_time(work_start, t, end=work_end)
 
         # Off 16-24
         off_start = current.replace(hour=16)
         off_end = current.replace(hour=23)
-        off_result: Result = analyse_at_time(off_start, task, end=off_end)
+        off_result: Result = analyse_at_time(off_start, t, end=off_end)
 
         print(f'{current}, {sleep_result.min_price}, {sleep_result.min_time}, {sleep_result.max_price}, {sleep_result.max_time}, {sleep_result.avg_price}, {work_result.min_price}, {work_result.min_time}, {work_result.max_price}, {work_result.max_time}, {work_result.avg_price}, {off_result.min_price}, {off_result.min_time}, {off_result.max_price}, {off_result.max_time}, {off_result.avg_price}')
 
