@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from infrastructure.co2_emission_point import Co2EmissionPoint
+from domain import Co2EmissionPoint
 from infrastructure.eds_requests import PricePoint
 import psycopg2
 from psycopg2 import extras

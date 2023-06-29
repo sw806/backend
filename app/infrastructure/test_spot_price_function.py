@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from random import random
 from typing import List
-from infrastructure.eletricity_prices import PricePoint
+from domain import PricePoint
 from infrastructure.spot_price_function import SpotPriceFunction
 
 

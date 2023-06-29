@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from infrastructure.discrete_function import DiscreteFunction
 
-from infrastructure.eletricity_prices import PricePoint
+from domain import PricePoint
 
 
 class SpotPriceFunction(DiscreteFunction[datetime, float, float, PricePoint]):

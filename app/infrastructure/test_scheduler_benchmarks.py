@@ -10,7 +10,7 @@ from infrastructure.schedule import Schedule
 from infrastructure.schedule_task import ScheduledTask
 from infrastructure.task import Task
 from infrastructure.power_usage_function import PowerUsageFunction
-from infrastructure.eletricity_prices import PricePoint
+from domain import PricePoint
 from infrastructure.spot_price_function import SpotPriceFunction
 
 def test_benchmark_1(benchmark):

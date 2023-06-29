@@ -1,4 +1,3 @@
-from .eletricity_prices import *
 from .eds_requests import *
 from .optimal_time_calculator import *
 from .task import *
@@ -13,4 +12,3 @@ from .spot_price_function import *
 from .lowest_price_recommender import *
 from .schedules_recommender import *
 from .task_validator_splitter import *
-from .co2_emission_point import *

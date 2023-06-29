@@ -1,7 +1,7 @@
 import math
 from datetime import datetime, timedelta
 from typing import List, Optional
-from .eletricity_prices import PricePoint
+from domain import PricePoint
 
 from opentelemetry import trace
 tracer = trace.get_tracer(__name__)

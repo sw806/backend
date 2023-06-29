@@ -3,7 +3,7 @@ from typing import List
 import psycopg2 as psycopg2
 from psycopg2.errors import UniqueViolation
 import pytest
-from infrastructure.eletricity_prices import PricePoint
+from domain import PricePoint
 from application.use_cases.get_spot_price_task import PostgresDatabase
 
 

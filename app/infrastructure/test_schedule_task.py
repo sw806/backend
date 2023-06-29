@@ -3,7 +3,7 @@ from random import random
 from typing import List
 
 from infrastructure.power_price_function import PowerPriceFunction
-from infrastructure.eletricity_prices import PricePoint
+from domain import PricePoint
 from infrastructure.spot_price_function import SpotPriceFunction
 from infrastructure.schedule_task import ScheduledTask
 from infrastructure.datetime_interval import DatetimeInterval

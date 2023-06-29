@@ -3,7 +3,7 @@ from typing import List
 from infrastructure.eds_requests import EdsRequests
 from infrastructure.postgres_database import PostgresDatabase
 from application.use_cases.use_Case import UseCase
-from infrastructure.co2_emission_point import Co2EmissionPoint, CO2EmissionsRepository
+from domain import Co2EmissionPoint, CO2EmissionsRepository
 from pydantic.dataclasses import dataclass
 
 

@@ -5,7 +5,7 @@ from infrastructure.discrete_function import DiscreteFunction
 from infrastructure.power_usage_function import PowerUsageFunction
 from infrastructure.spot_price_function import SpotPriceFunction
 from infrastructure.zipped_discrete_function import ZippedDiscreteFunction
-from infrastructure.eletricity_prices import PricePoint
+from domain import PricePoint
 from infrastructure.discrete_function_iterator import DiscreteFunctionIterator
 from infrastructure.scheduled_power_usage_function import ScheduledPowerUsageFunction
 

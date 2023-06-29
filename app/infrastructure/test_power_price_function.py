@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from random import random
 from typing import List, Tuple
 
-from infrastructure.eletricity_prices import PricePoint
+from domain import PricePoint
 from infrastructure.spot_price_function import SpotPriceFunction
 from infrastructure.power_usage_function import PowerUsageFunction
 from infrastructure.power_price_function import PowerPriceFunction

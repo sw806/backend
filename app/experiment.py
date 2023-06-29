@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 import sys
 from typing import Dict, List, Optional, Tuple
 
-from infrastructure.eletricity_prices import PricePoint
+from domain import PricePoint
 from infrastructure.eds_requests import EdsRequests
 from infrastructure.task import Task
 from infrastructure.spot_price_function import SpotPriceFunction

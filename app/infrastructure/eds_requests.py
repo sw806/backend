@@ -2,8 +2,8 @@ import requests
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone
 from requests import Response
-from .eletricity_prices import ElectricityPrices, PricePoint
-from .co2_emission_point import Co2EmissionPoint, CO2EmissionsRepository
+from domain import ElectricityPrices, PricePoint
+from domain import Co2EmissionPoint, CO2EmissionsRepository
 from .eds_url_builder import EdsUrlBuilder
 
 from opentelemetry import trace
